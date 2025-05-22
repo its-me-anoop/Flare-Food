@@ -103,33 +103,11 @@ private struct SymptomTrackingSheetContent: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: DesignSystem.Spacing.small) {
                     // Common symptoms
-                    ForEach([
-                        ("Bloating", Symptom.SymptomType.bloating),
-                        ("Stomach Pain", Symptom.SymptomType.stomachPain),
-                        ("Headache", Symptom.SymptomType.headache),
-                        ("Fatigue", Symptom.SymptomType.fatigue),
-                        ("Nausea", Symptom.SymptomType.nausea)
-                    ], id: \.0) { name, type in
-                        Button(action: {
-                            viewModel.selectedType = type
-                        }) {
-                            HStack(spacing: DesignSystem.Spacing.xxSmall) {
-                                Image(systemName: type.category.icon)
-                                Text(name)
-                            }
-                            .font(.subheadline)
-                            .fontWeight(viewModel.selectedType == type ? .semibold : .regular)
-                            .padding(.horizontal, DesignSystem.Spacing.small)
-                            .padding(.vertical, DesignSystem.Spacing.xSmall)
-                            .background(
-                                viewModel.selectedType == type
-                                    ? AnyView(DesignSystem.Gradients.secondary)
-                                    : AnyView(Color.gray.opacity(0.2))
-                            )
-                            .foregroundColor(viewModel.selectedType == type ? .white : DesignSystem.Colors.primaryText)
-                            .cornerRadius(DesignSystem.CornerRadius.small)
-                        }
-                    }
+                    quickSelectButton("Bloating", type: .bloating)
+                    quickSelectButton("Stomach Pain", type: .stomachPain)
+                    quickSelectButton("Headache", type: .headache)
+                    quickSelectButton("Fatigue", type: .fatigue)
+                    quickSelectButton("Nausea", type: .nausea)
                 }
                 .padding(.horizontal)
             }
@@ -148,7 +126,7 @@ private struct SymptomTrackingSheetContent: View {
                     Section(category.rawValue) {
                         ForEach(Symptom.SymptomType.allCases.filter { $0.category == category }, id: \.self) { type in
                             Button(action: {
-                                viewModel.selectedType = type
+                                viewModel.selectedSymptomType = type
                             }) {
                                 Label(type.rawValue, systemImage: category.icon)
                             }
@@ -157,15 +135,10 @@ private struct SymptomTrackingSheetContent: View {
                 }
             } label: {
                 HStack {
-                    if let selectedType = viewModel.selectedType {
-                        Image(systemName: selectedType.category.icon)
-                            .foregroundStyle(DesignSystem.Gradients.secondary)
-                        Text(selectedType.rawValue)
-                            .foregroundColor(DesignSystem.Colors.primaryText)
-                    } else {
-                        Text("Select symptom type")
-                            .foregroundColor(DesignSystem.Colors.secondaryText)
-                    }
+                    Image(systemName: viewModel.selectedSymptomType.category.icon)
+                        .foregroundStyle(DesignSystem.Gradients.secondary)
+                    Text(viewModel.selectedSymptomType.rawValue)
+                        .foregroundColor(DesignSystem.Colors.primaryText)
                     Spacer()
                     Image(systemName: "chevron.down")
                         .foregroundColor(DesignSystem.Colors.secondaryText)
@@ -195,7 +168,7 @@ private struct SymptomTrackingSheetContent: View {
                 Slider(value: $viewModel.severity, in: 0...10, step: 1) { _ in
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }
-                .tint(Color(severityGradient.stops.first?.color ?? .red))
+                .tint(severityColor)
                 
                 HStack {
                     Text("Mild")
@@ -226,7 +199,7 @@ private struct SymptomTrackingSheetContent: View {
                 .foregroundStyle(DesignSystem.Gradients.accent)
             
             HStack {
-                TextField("Duration", value: $viewModel.duration, format: .number)
+                TextField("Duration", text: $viewModel.durationMinutes)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .keyboardType(.numberPad)
                 
@@ -236,41 +209,52 @@ private struct SymptomTrackingSheetContent: View {
         }
     }
     
-    /// Potential triggers
+    /// Medications section
     private var triggersSection: some View {
         VStack(alignment: .leading, spacing: DesignSystem.Spacing.small) {
-            Label("Potential Triggers", systemImage: "exclamationmark.triangle")
+            Label("Medications", systemImage: "pills")
                 .font(.headline)
                 .foregroundStyle(DesignSystem.Gradients.primary)
             
-            // Recent meals as potential triggers
-            if !viewModel.recentMeals.isEmpty {
-                Text("Recent meals (tap to select)")
+            // Medications
+            if !viewModel.medications.isEmpty {
+                Text("Current medications")
                     .font(.caption)
                     .foregroundColor(DesignSystem.Colors.secondaryText)
                 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: DesignSystem.Spacing.small) {
-                        ForEach(viewModel.recentMeals) { meal in
-                            TriggerChip(
-                                title: meal.type.rawValue,
-                                subtitle: meal.timestamp.formatted(date: .omitted, time: .shortened),
-                                isSelected: viewModel.selectedMealTriggers.contains(meal.id),
-                                action: {
-                                    if viewModel.selectedMealTriggers.contains(meal.id) {
-                                        viewModel.selectedMealTriggers.remove(meal.id)
-                                    } else {
-                                        viewModel.selectedMealTriggers.insert(meal.id)
-                                    }
-                                }
-                            )
+                ForEach(viewModel.medications, id: \.self) { medication in
+                    HStack {
+                        Text(medication)
+                            .font(.subheadline)
+                        Spacer()
+                        Button(action: {
+                            if let index = viewModel.medications.firstIndex(of: medication) {
+                                viewModel.removeMedication(at: index)
+                            }
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.gray)
                         }
                     }
+                    .padding(.horizontal, DesignSystem.Spacing.small)
+                    .padding(.vertical, DesignSystem.Spacing.xSmall)
+                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.xSmall)
                 }
             }
             
-            // Custom triggers
-            TextField("Other triggers (comma separated)", text: $viewModel.customTriggers)
+            // Add medication
+            HStack {
+                TextField("Add medication", text: $viewModel.newMedication)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                Button(action: {
+                    viewModel.addMedication()
+                }) {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundStyle(DesignSystem.Gradients.primary)
+                }
+                .disabled(viewModel.newMedication.isEmpty)
+            }
                 .textFieldStyle(RoundedBorderTextFieldStyle())
         }
     }
@@ -311,7 +295,7 @@ private struct SymptomTrackingSheetContent: View {
                         dismiss()
                     }
                 },
-                isDisabled: viewModel.selectedType == nil
+                isDisabled: false
             )
             .frame(maxWidth: .infinity)
         }
@@ -320,7 +304,7 @@ private struct SymptomTrackingSheetContent: View {
     // MARK: - Helper Properties
     
     private var severityGradient: LinearGradient {
-        switch viewModel.severityLevel {
+        switch severityLevel {
         case .mild:
             return DesignSystem.Gradients.success
         case .moderate:
@@ -332,8 +316,30 @@ private struct SymptomTrackingSheetContent: View {
         }
     }
     
+    private var severityColor: Color {
+        switch severityLevel {
+        case .mild:
+            return .green
+        case .moderate:
+            return .yellow
+        case .severe:
+            return .orange
+        case .verySevere:
+            return .red
+        }
+    }
+    
+    private var severityLevel: Symptom.SeverityLevel {
+        switch viewModel.severity {
+        case 0..<2.5: return .mild
+        case 2.5..<5.0: return .moderate
+        case 5.0..<7.5: return .severe
+        default: return .verySevere
+        }
+    }
+    
     private var severityDescription: String {
-        switch viewModel.severityLevel {
+        switch severityLevel {
         case .mild:
             return "Mild discomfort, easily manageable"
         case .moderate:
@@ -342,6 +348,28 @@ private struct SymptomTrackingSheetContent: View {
             return "Significant discomfort, interferes with daily activities"
         case .verySevere:
             return "Intense discomfort, severely limits activities"
+        }
+    }
+    
+    private func quickSelectButton(_ title: String, type: Symptom.SymptomType) -> some View {
+        Button(action: {
+            viewModel.selectedSymptomType = type
+        }) {
+            HStack(spacing: DesignSystem.Spacing.xxSmall) {
+                Image(systemName: type.category.icon)
+                Text(title)
+            }
+            .font(.subheadline)
+            .fontWeight(viewModel.selectedSymptomType == type ? .semibold : .regular)
+            .padding(.horizontal, DesignSystem.Spacing.small)
+            .padding(.vertical, DesignSystem.Spacing.xSmall)
+            .background(
+                viewModel.selectedSymptomType == type
+                    ? DesignSystem.Gradients.secondary
+                    : LinearGradient(colors: [Color.gray.opacity(0.2)], startPoint: .leading, endPoint: .trailing)
+            )
+            .foregroundColor(viewModel.selectedSymptomType == type ? .white : DesignSystem.Colors.primaryText)
+            .cornerRadius(DesignSystem.CornerRadius.small)
         }
     }
 }
