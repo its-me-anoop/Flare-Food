@@ -84,7 +84,7 @@ private struct SymptomTrackingSheetContent: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(DesignSystem.Colors.primary)
+                    .foregroundColor(DesignSystem.Colors.primaryGradientStart)
                 }
             }
         }
@@ -238,7 +238,7 @@ private struct SymptomTrackingSheetContent: View {
                     }
                     .padding(.horizontal, DesignSystem.Spacing.small)
                     .padding(.vertical, DesignSystem.Spacing.xSmall)
-                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.xSmall)
+                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
                 }
             }
             
