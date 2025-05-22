@@ -15,6 +15,9 @@ struct HomeView: View {
     @Query(sort: \Symptom.timestamp, order: .reverse) private var recentSymptoms: [Symptom]
     @Query private var userProfiles: [UserProfile]
     
+    @State private var showingMealLogger = false
+    @State private var showingSymptomTracker = false
+    
     private var userProfile: UserProfile? {
         userProfiles.first
     }
@@ -55,6 +58,13 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.large)
             .onAppear {
                 ensureUserProfile()
+            }
+            .sheet(isPresented: $showingMealLogger) {
+                MealLoggingSheet()
+            }
+            .sheet(isPresented: $showingSymptomTracker) {
+                // TODO: Create SymptomTrackingSheet
+                SymptomTrackingView()
             }
         }
     }
@@ -158,7 +168,7 @@ struct HomeView: View {
                     icon: "plus.circle.fill",
                     color: .orange,
                     action: {
-                        // Navigate to meal logging
+                        showingMealLogger = true
                     }
                 )
                 
@@ -167,7 +177,7 @@ struct HomeView: View {
                     icon: "heart.text.square.fill",
                     color: .pink,
                     action: {
-                        // Navigate to symptom tracking
+                        showingSymptomTracker = true
                     }
                 )
             }

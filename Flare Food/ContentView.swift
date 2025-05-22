@@ -34,11 +34,11 @@ struct ContentView: View {
                     }
                     .tag(Tab.home)
                 
-                MealLoggingView()
+                MealsListView()
                     .tabItem {
-                        Label("Log Meal", systemImage: "plus.circle.fill")
+                        Label("Meals", systemImage: "fork.knife")
                     }
-                    .tag(Tab.logMeal)
+                    .tag(Tab.meals)
                 
                 SymptomTrackingView()
                     .tabItem {
@@ -72,8 +72,8 @@ struct ContentView: View {
             switch selectedTab {
             case .home:
                 HomeView()
-            case .logMeal:
-                MealLoggingView()
+            case .meals:
+                MealsListView()
             case .symptoms:
                 SymptomTrackingView()
             case .analytics:
@@ -89,7 +89,7 @@ struct ContentView: View {
 /// Tab enumeration for navigation
 enum Tab: String, CaseIterable {
     case home
-    case logMeal
+    case meals
     case symptoms
     case analytics
     case settings
@@ -97,7 +97,7 @@ enum Tab: String, CaseIterable {
     var title: String {
         switch self {
         case .home: return "Home"
-        case .logMeal: return "Log Meal"
+        case .meals: return "Meals"
         case .symptoms: return "Symptoms"
         case .analytics: return "Analytics"
         case .settings: return "Settings"
@@ -107,7 +107,7 @@ enum Tab: String, CaseIterable {
     var icon: String {
         switch self {
         case .home: return "house.fill"
-        case .logMeal: return "plus.circle.fill"
+        case .meals: return "fork.knife"
         case .symptoms: return "heart.text.square.fill"
         case .analytics: return "chart.line.uptrend.xyaxis"
         case .settings: return "gear"
