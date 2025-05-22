@@ -63,8 +63,7 @@ struct HomeView: View {
                 MealLoggingSheet()
             }
             .sheet(isPresented: $showingSymptomTracker) {
-                // TODO: Create SymptomTrackingSheet
-                SymptomTrackingView()
+                SymptomTrackingSheet()
             }
         }
     }

@@ -237,3 +237,48 @@ struct FloatingActionButton: View {
         }
     }
 }
+
+/// Gradient button
+struct GradientButton: View {
+    let title: String
+    let icon: String?
+    let gradient: LinearGradient
+    let action: () -> Void
+    let isDisabled: Bool
+    
+    init(title: String, icon: String? = nil, gradient: LinearGradient = DesignSystem.Gradients.primary, action: @escaping () -> Void, isDisabled: Bool = false) {
+        self.title = title
+        self.icon = icon
+        self.gradient = gradient
+        self.action = action
+        self.isDisabled = isDisabled
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: DesignSystem.Spacing.small) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                }
+                Text(title)
+                    .fontWeight(.semibold)
+            }
+            .foregroundColor(.white)
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(
+                Group {
+                    if isDisabled {
+                        Color.gray
+                    } else {
+                        gradient
+                    }
+                }
+            )
+            .cornerRadius(DesignSystem.CornerRadius.medium)
+            .shadow(color: isDisabled ? .clear : Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+        }
+        .disabled(isDisabled)
+    }
+}
+

@@ -40,7 +40,7 @@ struct ContentView: View {
                     }
                     .tag(Tab.meals)
                 
-                SymptomTrackingView()
+                SymptomsListView()
                     .tabItem {
                         Label("Symptoms", systemImage: "heart.text.square.fill")
                     }
@@ -75,7 +75,7 @@ struct ContentView: View {
             case .meals:
                 MealsListView()
             case .symptoms:
-                SymptomTrackingView()
+                SymptomsListView()
             case .analytics:
                 AnalyticsView()
             case .settings:
