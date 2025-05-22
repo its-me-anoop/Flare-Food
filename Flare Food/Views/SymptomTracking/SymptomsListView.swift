@@ -239,8 +239,8 @@ struct SymptomRowView: View {
         VStack(alignment: .leading, spacing: DesignSystem.Spacing.small) {
             // Header
             HStack {
-                // Category icon
-                Image(systemName: symptom.type.category.icon)
+                // Symptom icon
+                Image(systemName: symptom.type.icon)
                     .font(.title2)
                     .foregroundStyle(severityGradient)
                     .frame(width: 44, height: 44)

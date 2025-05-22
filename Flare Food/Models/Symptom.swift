@@ -162,6 +162,54 @@ extension Symptom {
                 return .other
             }
         }
+        
+        /// Icon for each symptom type
+        var icon: String {
+            switch self {
+            // Digestive
+            case .bloating: return "wind"
+            case .gasAndFlatulence: return "cloud.fill"
+            case .stomachPain: return "bolt.heart.fill"
+            case .nausea: return "face.dashed"
+            case .diarrhea: return "drop.fill"
+            case .constipation: return "hourglass.bottomhalf.filled"
+            case .heartburn: return "flame.fill"
+            case .indigestion: return "fork.knife.circle"
+            
+            // Skin
+            case .rash: return "allergens"
+            case .hives: return "circle.hexagongrid.circle.fill"
+            case .eczemaFlare: return "bandage.fill"
+            case .acne: return "face.dashed.fill"
+            case .itching: return "hand.raised.fingers.spread.fill"
+            case .dryness: return "drop.degreesign.slash.fill"
+            
+            // Neurological
+            case .headache: return "brain.head.profile"
+            case .migraine: return "bolt.fill"
+            case .brainFog: return "cloud.fog.fill"
+            case .dizziness: return "tornado"
+            case .fatigue: return "battery.25"
+            case .insomnia: return "moon.zzz.fill"
+            
+            // Respiratory
+            case .congestion: return "nose"
+            case .coughing: return "waveform.path.ecg"
+            case .shortnessOfBreath: return "lungs.fill"
+            case .wheezing: return "waveform"
+            
+            // Musculoskeletal
+            case .jointPain: return "figure.walk.motion"
+            case .muscleAches: return "figure.strengthtraining.traditional"
+            case .stiffness: return "figure.stand"
+            case .inflammation: return "flame.circle.fill"
+            
+            // Other
+            case .moodChanges: return "brain"
+            case .anxiety: return "heart.text.square.fill"
+            case .other: return "questionmark.circle.fill"
+            }
+        }
     }
     
     /// Computed property to get SymptomType enum from stored string

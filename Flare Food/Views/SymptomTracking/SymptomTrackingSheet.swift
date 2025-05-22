@@ -128,14 +128,14 @@ private struct SymptomTrackingSheetContent: View {
                             Button(action: {
                                 viewModel.selectedSymptomType = type
                             }) {
-                                Label(type.rawValue, systemImage: category.icon)
+                                Label(type.rawValue, systemImage: type.icon)
                             }
                         }
                     }
                 }
             } label: {
                 HStack {
-                    Image(systemName: viewModel.selectedSymptomType.category.icon)
+                    Image(systemName: viewModel.selectedSymptomType.icon)
                         .foregroundStyle(DesignSystem.Gradients.secondary)
                     Text(viewModel.selectedSymptomType.rawValue)
                         .foregroundColor(DesignSystem.Colors.primaryText)
@@ -356,7 +356,7 @@ private struct SymptomTrackingSheetContent: View {
             viewModel.selectedSymptomType = type
         }) {
             HStack(spacing: DesignSystem.Spacing.xxSmall) {
-                Image(systemName: type.category.icon)
+                Image(systemName: type.icon)
                 Text(title)
             }
             .font(.subheadline)
