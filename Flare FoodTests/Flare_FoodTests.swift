@@ -6,11 +6,14 @@
 //
 
 import Testing
+@testable import Flare_Food
 
+/// Main test suite for Flare Food app
 struct Flare_FoodTests {
-
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    
+    @Test("App name is correct")
+    func testAppName() async throws {
+        // This is a placeholder test
+        #expect(true)
     }
-
 }

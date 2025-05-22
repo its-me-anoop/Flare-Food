@@ -8,59 +8,130 @@
 import SwiftUI
 import SwiftData
 
+/// Main content view with tab navigation
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @State private var selectedTab = Tab.home
+    
     var body: some View {
+        #if os(iOS)
+        ZStack {
+            // Background gradient
+            LinearGradient(
+                colors: [
+                    DesignSystem.Colors.background,
+                    DesignSystem.Colors.background.opacity(0.8)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            
+            TabView(selection: $selectedTab) {
+                HomeView()
+                    .tabItem {
+                        Label("Home", systemImage: "house.fill")
+                    }
+                    .tag(Tab.home)
+                
+                MealLoggingView()
+                    .tabItem {
+                        Label("Log Meal", systemImage: "plus.circle.fill")
+                    }
+                    .tag(Tab.logMeal)
+                
+                SymptomTrackingView()
+                    .tabItem {
+                        Label("Symptoms", systemImage: "heart.text.square.fill")
+                    }
+                    .tag(Tab.symptoms)
+                
+                AnalyticsView()
+                    .tabItem {
+                        Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
+                    }
+                    .tag(Tab.analytics)
+                
+                SettingsView()
+                    .tabItem {
+                        Label("Settings", systemImage: "gear")
+                    }
+                    .tag(Tab.settings)
+            }
+            .tint(DesignSystem.Colors.primaryGradientStart)
+        }
+        #else
+        // macOS sidebar navigation
         NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+            List(Tab.allCases, id: \.self, selection: $selectedTab) { tab in
+                Label(tab.title, systemImage: tab.icon)
+                    .tag(tab)
             }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
+            .navigationSplitViewColumnWidth(min: 200, ideal: 250)
         } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+            switch selectedTab {
+            case .home:
+                HomeView()
+            case .logMeal:
+                MealLoggingView()
+            case .symptoms:
+                SymptomTrackingView()
+            case .analytics:
+                AnalyticsView()
+            case .settings:
+                SettingsView()
             }
+        }
+        #endif
+    }
+}
+
+/// Tab enumeration for navigation
+enum Tab: String, CaseIterable {
+    case home
+    case logMeal
+    case symptoms
+    case analytics
+    case settings
+    
+    var title: String {
+        switch self {
+        case .home: return "Home"
+        case .logMeal: return "Log Meal"
+        case .symptoms: return "Symptoms"
+        case .analytics: return "Analytics"
+        case .settings: return "Settings"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .home: return "house.fill"
+        case .logMeal: return "plus.circle.fill"
+        case .symptoms: return "heart.text.square.fill"
+        case .analytics: return "chart.line.uptrend.xyaxis"
+        case .settings: return "gear"
         }
     }
 }
 
+// MARK: - Placeholder Views (to be implemented)
+
+// HomeView is now defined in Views/Home/HomeView.swift
+// MealLoggingView is now defined in Views/MealLogging/MealLoggingView.swift
+// SymptomTrackingView is now defined in Views/SymptomTracking/SymptomTrackingView.swift
+// AnalyticsView is now defined in Views/Analytics/AnalyticsView.swift
+// SettingsView is now defined in Views/Settings/SettingsView.swift
+
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: [
+            Food.self,
+            Meal.self,
+            FoodItem.self,
+            Symptom.self,
+            Correlation.self,
+            UserProfile.self,
+            MealReminderTime.self
+        ], inMemory: true)
 }

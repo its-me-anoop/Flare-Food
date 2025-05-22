@@ -1,0 +1,391 @@
+//
+//  HomeView.swift
+//  Flare Food
+//
+//  Created by Anoop Jose on 22/05/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+/// Home dashboard view
+struct HomeView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Meal.timestamp, order: .reverse) private var recentMeals: [Meal]
+    @Query(sort: \Symptom.timestamp, order: .reverse) private var recentSymptoms: [Symptom]
+    @Query private var userProfiles: [UserProfile]
+    
+    private var userProfile: UserProfile? {
+        userProfiles.first
+    }
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                // Background gradient
+                LinearGradient(
+                    colors: [
+                        Color.clear,
+                        DesignSystem.Colors.primaryGradientStart.opacity(0.1),
+                        DesignSystem.Colors.primaryGradientEnd.opacity(0.05)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: DesignSystem.Spacing.large) {
+                        // Welcome Section
+                        welcomeSection
+                        
+                        // Stats Section
+                        statsSection
+                        
+                        // Recent Activity
+                        recentActivitySection
+                        
+                        // Quick Actions
+                        quickActionsSection
+                    }
+                    .padding()
+                }
+            }
+            .navigationTitle("Home")
+            .navigationBarTitleDisplayMode(.large)
+            .onAppear {
+                ensureUserProfile()
+            }
+        }
+    }
+    
+    // MARK: - Sections
+    
+    /// Welcome section with greeting
+    private var welcomeSection: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xSmall) {
+            GradientText(greeting, gradient: DesignSystem.Gradients.primary, font: .largeTitle.bold())
+            
+            if let profile = userProfile {
+                if profile.currentStreak > 0 {
+                    HStack(spacing: DesignSystem.Spacing.xxSmall) {
+                        Image(systemName: "flame.fill")
+                            .foregroundStyle(DesignSystem.Gradients.primary)
+                        Text("\(profile.currentStreak) day streak!")
+                            .fontWeight(.medium)
+                            .foregroundColor(DesignSystem.Colors.secondaryText)
+                    }
+                    .font(.title3)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, DesignSystem.Spacing.small)
+    }
+    
+    /// Stats overview section
+    private var statsSection: some View {
+        HStack(spacing: DesignSystem.Spacing.small) {
+            StatCard(
+                title: "Meals Logged",
+                value: "\(userProfile?.totalMealsLogged ?? 0)",
+                icon: "fork.knife",
+                gradient: DesignSystem.Gradients.primary
+            )
+            
+            StatCard(
+                title: "Symptoms Tracked",
+                value: "\(userProfile?.totalSymptomsLogged ?? 0)",
+                icon: "heart.text.square.fill",
+                gradient: DesignSystem.Gradients.secondary
+            )
+        }
+    }
+    
+    /// Recent activity section
+    private var recentActivitySection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Recent Activity")
+                .font(.headline)
+            
+            if recentMeals.isEmpty && recentSymptoms.isEmpty {
+                EmptyStateCard(
+                    title: "No Activity Yet",
+                    message: "Start by logging your first meal or symptom",
+                    icon: "chart.bar.doc.horizontal"
+                )
+            } else {
+                VStack(spacing: 12) {
+                    // Recent Meals
+                    if !recentMeals.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label("Recent Meals", systemImage: "clock")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            ForEach(recentMeals.prefix(3)) { meal in
+                                RecentMealCard(meal: meal)
+                            }
+                        }
+                    }
+                    
+                    // Recent Symptoms
+                    if !recentSymptoms.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label("Recent Symptoms", systemImage: "clock")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            ForEach(recentSymptoms.prefix(3)) { symptom in
+                                RecentSymptomCard(symptom: symptom)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /// Quick actions section
+    private var quickActionsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Quick Actions")
+                .font(.headline)
+            
+            HStack(spacing: 16) {
+                QuickActionButton(
+                    title: "Log Meal",
+                    icon: "plus.circle.fill",
+                    color: .orange,
+                    action: {
+                        // Navigate to meal logging
+                    }
+                )
+                
+                QuickActionButton(
+                    title: "Track Symptom",
+                    icon: "heart.text.square.fill",
+                    color: .pink,
+                    action: {
+                        // Navigate to symptom tracking
+                    }
+                )
+            }
+        }
+    }
+    
+    // MARK: - Helper Properties
+    
+    /// Dynamic greeting based on time of day
+    private var greeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        
+        switch hour {
+        case 0..<12:
+            return "Good Morning"
+        case 12..<17:
+            return "Good Afternoon"
+        default:
+            return "Good Evening"
+        }
+    }
+    
+    /// Ensures a user profile exists
+    private func ensureUserProfile() {
+        if userProfiles.isEmpty {
+            let profile = UserProfile()
+            modelContext.insert(profile)
+        }
+    }
+}
+
+// MARK: - Supporting Views
+
+/// Statistics card
+struct StatCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let gradient: LinearGradient
+    
+    var body: some View {
+        VStack(spacing: DesignSystem.Spacing.xSmall) {
+            Image(systemName: icon)
+                .font(.largeTitle)
+                .foregroundStyle(gradient)
+            
+            Text(value)
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundStyle(gradient)
+            
+            Text(title)
+                .font(.caption)
+                .foregroundColor(DesignSystem.Colors.secondaryText)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(DesignSystem.Spacing.medium)
+        .glassBackground()
+    }
+}
+
+/// Recent meal card
+struct RecentMealCard: View {
+    let meal: Meal
+    
+    var body: some View {
+        HStack {
+            Image(systemName: meal.type.icon)
+                .font(.title2)
+                .foregroundStyle(DesignSystem.Gradients.primary)
+                .frame(width: 44, height: 44)
+                .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(meal.type.rawValue)
+                    .font(.headline)
+                    .foregroundColor(DesignSystem.Colors.primaryText)
+                
+                if !meal.foodItems.isEmpty {
+                    Text(meal.foodItems.prefix(2).compactMap { $0.food?.name }.joined(separator: ", "))
+                        .font(.caption)
+                        .foregroundColor(DesignSystem.Colors.secondaryText)
+                        .lineLimit(1)
+                }
+            }
+            
+            Spacer()
+            
+            Text(meal.timestamp, style: .time)
+                .font(.caption)
+                .foregroundColor(DesignSystem.Colors.secondaryText)
+        }
+        .padding(DesignSystem.Spacing.small)
+        .glassBackground()
+    }
+}
+
+/// Recent symptom card
+struct RecentSymptomCard: View {
+    let symptom: Symptom
+    
+    var body: some View {
+        HStack {
+            Image(systemName: symptom.type.category.icon)
+                .font(.title2)
+                .foregroundStyle(DesignSystem.Gradients.secondary)
+                .frame(width: 44, height: 44)
+                .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(symptom.type.rawValue)
+                    .font(.headline)
+                    .foregroundColor(DesignSystem.Colors.primaryText)
+                
+                HStack {
+                    Text("Severity: \(Int(symptom.severity))/10")
+                        .font(.caption)
+                    
+                    Circle()
+                        .fill(severityGradient(for: symptom.severityLevel))
+                        .frame(width: 8, height: 8)
+                }
+                .foregroundColor(DesignSystem.Colors.secondaryText)
+            }
+            
+            Spacer()
+            
+            Text(symptom.timestamp, style: .time)
+                .font(.caption)
+                .foregroundColor(DesignSystem.Colors.secondaryText)
+        }
+        .padding(DesignSystem.Spacing.small)
+        .glassBackground()
+    }
+    
+    private func severityGradient(for level: Symptom.SeverityLevel) -> LinearGradient {
+        switch level {
+        case .mild:
+            return DesignSystem.Gradients.success
+        case .moderate:
+            return DesignSystem.Gradients.accent
+        case .severe:
+            return DesignSystem.Gradients.primary
+        case .verySevere:
+            return DesignSystem.Gradients.secondary
+        }
+    }
+}
+
+/// Quick action button
+struct QuickActionButton: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: DesignSystem.Spacing.xxSmall) {
+                Image(systemName: icon)
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(DesignSystem.Spacing.medium)
+            .background(
+                color == .orange ? DesignSystem.Gradients.primary : DesignSystem.Gradients.secondary
+            )
+            .cornerRadius(DesignSystem.CornerRadius.medium)
+            .shadow(color: color.opacity(0.3), radius: 12, x: 0, y: 6)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .scaleEffect(1.0)
+    }
+}
+
+/// Empty state card
+struct EmptyStateCard: View {
+    let title: String
+    let message: String
+    let icon: String
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.largeTitle)
+                .foregroundColor(.gray)
+            
+            Text(title)
+                .font(.headline)
+            
+            Text(message)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(12)
+    }
+}
+
+// MARK: - Preview
+
+#Preview {
+    HomeView()
+        .modelContainer(for: [
+            Food.self,
+            Meal.self,
+            FoodItem.self,
+            Symptom.self,
+            Correlation.self,
+            UserProfile.self,
+            MealReminderTime.self
+        ], inMemory: true)
+}
