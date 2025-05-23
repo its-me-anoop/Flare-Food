@@ -140,26 +140,20 @@ struct MealsListView: View {
     
     /// Meals list view
     private var mealsList: some View {
-        ScrollView {
-            VStack(spacing: DesignSystem.Spacing.medium) {
-                // Meal type filter
-                mealTypeFilter
-                
-                // Grouped meals
+        VStack(spacing: 0) {
+            // Meal type filter
+            mealTypeFilter
+                .padding(.vertical, DesignSystem.Spacing.small)
+            
+            // Grouped meals in List
+            List {
                 ForEach(groupedMeals, id: \.date) { group in
-                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.xSmall) {
-                        // Date header
-                        Text(dateHeader(for: group.date))
-                            .font(.headline)
-                            .foregroundColor(DesignSystem.Colors.secondaryText)
-                            .padding(.horizontal)
-                        
-                        // Meals for this date
+                    Section {
                         ForEach(group.meals) { meal in
                             MealRowView(meal: meal) {
                                 selectedMeal = meal
                             }
-                            .padding(.horizontal)
+                            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
                                     mealToDelete = meal
@@ -176,11 +170,15 @@ struct MealsListView: View {
                                 .tint(.orange)
                             }
                         }
+                    } header: {
+                        Text(dateHeader(for: group.date))
+                            .font(.headline)
+                            .foregroundColor(DesignSystem.Colors.secondaryText)
                     }
-                    .padding(.vertical, DesignSystem.Spacing.xxSmall)
                 }
             }
-            .padding(.vertical)
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
         }
     }
     

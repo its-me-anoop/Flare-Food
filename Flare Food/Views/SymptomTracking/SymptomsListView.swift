@@ -93,47 +93,42 @@ struct SymptomsListView: View {
                             .padding(.vertical, DesignSystem.Spacing.small)
                         
                         // Symptoms list
-                        ScrollView {
-                            LazyVStack(spacing: DesignSystem.Spacing.medium, pinnedViews: .sectionHeaders) {
-                                if filteredSymptoms.isEmpty {
-                                    noResultsView
-                                        .padding(.top, 100)
-                                } else {
-                                    ForEach(groupedSymptoms, id: \.key) { dateGroup in
-                                        Section {
-                                            ForEach(dateGroup.value) { symptom in
-                                                SymptomRowView(symptom: symptom)
-                                                    .padding(.horizontal)
-                                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                                        Button(role: .destructive) {
-                                                            symptomToDelete = symptom
-                                                            showingDeleteAlert = true
-                                                        } label: {
-                                                            Label("Delete", systemImage: "trash")
-                                                        }
-                                                        
-                                                        Button {
-                                                            symptomToEdit = symptom
-                                                        } label: {
-                                                            Label("Edit", systemImage: "pencil")
-                                                        }
-                                                        .tint(.purple)
+                        if filteredSymptoms.isEmpty {
+                            Spacer()
+                            noResultsView
+                            Spacer()
+                        } else {
+                            List {
+                                ForEach(groupedSymptoms, id: \.key) { dateGroup in
+                                    Section {
+                                        ForEach(dateGroup.value) { symptom in
+                                            SymptomRowView(symptom: symptom)
+                                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                                    Button(role: .destructive) {
+                                                        symptomToDelete = symptom
+                                                        showingDeleteAlert = true
+                                                    } label: {
+                                                        Label("Delete", systemImage: "trash")
                                                     }
-                                            }
-                                        } header: {
-                                            HStack {
-                                                Text(dateGroup.key)
-                                                    .font(.headline)
-                                                    .foregroundColor(DesignSystem.Colors.primaryText)
-                                                    .padding(.vertical, DesignSystem.Spacing.xSmall)
-                                                Spacer()
-                                            }
-                                            .padding(.horizontal)
+                                                    
+                                                    Button {
+                                                        symptomToEdit = symptom
+                                                    } label: {
+                                                        Label("Edit", systemImage: "pencil")
+                                                    }
+                                                    .tint(.purple)
+                                                }
                                         }
+                                    } header: {
+                                        Text(dateGroup.key)
+                                            .font(.headline)
+                                            .foregroundColor(DesignSystem.Colors.secondaryText)
                                     }
                                 }
                             }
-                            .padding(.vertical, DesignSystem.Spacing.small)
+                            .listStyle(.plain)
+                            .scrollContentBackground(.hidden)
                         }
                     }
                 }
