@@ -32,6 +32,9 @@ final class Food {
     /// Whether this food is marked as a favorite for quick access
     var isFavorite: Bool
     
+    /// Whether this is a custom user-created food
+    var isCustom: Bool
+    
     /// Optional notes about this food
     var notes: String?
     
@@ -45,6 +48,7 @@ final class Food {
         name: String,
         category: String,
         commonTriggers: [String] = [],
+        isCustom: Bool = false,
         notes: String? = nil
     ) {
         self.id = UUID()
@@ -54,6 +58,7 @@ final class Food {
         self.dateAdded = Date()
         self.usageCount = 0
         self.isFavorite = false
+        self.isCustom = isCustom
         self.notes = notes
     }
 }

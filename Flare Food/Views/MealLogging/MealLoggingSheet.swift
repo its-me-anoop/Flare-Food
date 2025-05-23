@@ -27,6 +27,7 @@ private struct MealLoggingSheetContent: View {
     let modelContext: ModelContext
     @StateObject private var viewModel: MealLoggingViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showingCustomFoodSheet = false
     
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -99,6 +100,12 @@ private struct MealLoggingSheetContent: View {
                         }
                 }
             }
+            .sheet(isPresented: $showingCustomFoodSheet) {
+                CustomFoodSheet { newFood in
+                    // Add the newly created food to the selection
+                    viewModel.addFood(newFood)
+                }
+            }
         }
     }
     
@@ -151,10 +158,27 @@ private struct MealLoggingSheetContent: View {
     /// Recent foods section
     private var recentFoodsSection: some View {
         VStack(alignment: .leading, spacing: DesignSystem.Spacing.xSmall) {
-            Text("Recent Foods")
-                .font(.caption)
-                .foregroundColor(DesignSystem.Colors.secondaryText)
-                .padding(.horizontal, DesignSystem.Spacing.xxxSmall)
+            HStack {
+                Text("Recent Foods")
+                    .font(.caption)
+                    .foregroundColor(DesignSystem.Colors.secondaryText)
+                
+                Spacer()
+                
+                Button {
+                    showingCustomFoodSheet = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.caption)
+                        Text("Custom")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(DesignSystem.Colors.primaryGradientStart)
+                }
+            }
+            .padding(.horizontal, DesignSystem.Spacing.xxxSmall)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: DesignSystem.Spacing.xxSmall) {
@@ -206,6 +230,34 @@ private struct MealLoggingSheetContent: View {
                         }
                     }
                 }
+            } else if !viewModel.foodSearchQuery.isEmpty {
+                // Add custom food option when no results found
+                Button {
+                    showingCustomFoodSheet = true
+                } label: {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(DesignSystem.Gradients.primary)
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Add \"\(viewModel.foodSearchQuery)\" as custom food")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                            Text("Create a new food item")
+                                .font(.caption)
+                                .foregroundColor(DesignSystem.Colors.secondaryText)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(DesignSystem.Colors.secondaryText)
+                    }
+                    .padding()
+                    .glassBackground()
+                }
+                .buttonStyle(PlainButtonStyle())
             }
         }
     }
@@ -315,6 +367,13 @@ struct QuickAddFoodChip: View {
             HStack(spacing: DesignSystem.Spacing.xxxSmall) {
                 Text(food.name)
                     .font(.caption)
+                
+                if food.isCustom {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 8))
+                        .foregroundColor(.yellow)
+                }
+                
                 Image(systemName: "plus.circle")
                     .font(.caption2)
             }
@@ -336,9 +395,17 @@ struct CompactFoodRow: View {
         Button(action: action) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(food.name)
-                        .font(.subheadline)
-                        .foregroundColor(DesignSystem.Colors.primaryText)
+                    HStack(spacing: 4) {
+                        Text(food.name)
+                            .font(.subheadline)
+                            .foregroundColor(DesignSystem.Colors.primaryText)
+                        
+                        if food.isCustom {
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(.yellow)
+                        }
+                    }
                     Text(food.category)
                         .font(.caption2)
                         .foregroundColor(DesignSystem.Colors.secondaryText)
