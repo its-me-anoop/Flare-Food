@@ -71,18 +71,6 @@ struct SymptomsListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [
-                        Color.clear,
-                        DesignSystem.Colors.secondaryGradientStart.opacity(0.1),
-                        DesignSystem.Colors.secondaryGradientEnd.opacity(0.05)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
                 // Content
                 if symptoms.isEmpty {
                     emptyStateView

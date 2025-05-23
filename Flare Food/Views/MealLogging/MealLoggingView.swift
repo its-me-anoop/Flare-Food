@@ -31,19 +31,7 @@ private struct MealLoggingContentView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [
-                        Color.clear,
-                        DesignSystem.Colors.primaryGradientStart.opacity(0.05)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-                
-                ScrollView {
+            ScrollView {
                     VStack(spacing: DesignSystem.Spacing.large) {
                         // Meal Type Selection
                         mealTypeSection
@@ -67,7 +55,6 @@ private struct MealLoggingContentView: View {
                     }
                     .padding()
                 }
-            }
             .navigationTitle("Log Meal")
             .navigationBarTitleDisplayMode(.large)
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {

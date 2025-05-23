@@ -15,19 +15,7 @@ struct ContentView: View {
     
     var body: some View {
         #if os(iOS)
-        ZStack {
-            // Background gradient
-            LinearGradient(
-                colors: [
-                    DesignSystem.Colors.background,
-                    DesignSystem.Colors.background.opacity(0.8)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-            
-            TabView(selection: $selectedTab) {
+        TabView(selection: $selectedTab) {
                 HomeView()
                     .tabItem {
                         Label("Home", systemImage: "house.fill")
@@ -57,9 +45,8 @@ struct ContentView: View {
                         Label("Settings", systemImage: "gear")
                     }
                     .tag(Tab.settings)
-            }
-            .tint(DesignSystem.Colors.primaryGradientStart)
         }
+        .tint(DesignSystem.Colors.primaryGradientStart)
         #else
         // macOS sidebar navigation
         NavigationSplitView {

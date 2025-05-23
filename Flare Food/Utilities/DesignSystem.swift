@@ -29,16 +29,19 @@ struct DesignSystem {
         static let successGradientStart = Color(red: 52/255, green: 199/255, blue: 89/255)
         static let successGradientEnd = Color(red: 48/255, green: 176/255, blue: 199/255)
         
-        // Background colors
-        static let background = Color(red: 242/255, green: 242/255, blue: 247/255)
-        static let secondaryBackground = Color.white
+        // Background colors - Using system defaults
+        static let background = Color(UIColor.systemBackground)
+        static let secondaryBackground = Color(UIColor.secondarySystemBackground)
+        static let tertiaryBackground = Color(UIColor.tertiarySystemBackground)
+        static let groupedBackground = Color(UIColor.systemGroupedBackground)
         
-        // Text colors
-        static let primaryText = Color.primary
-        static let secondaryText = Color.secondary
+        // Text colors - Using system defaults
+        static let primaryText = Color(UIColor.label)
+        static let secondaryText = Color(UIColor.secondaryLabel)
+        static let tertiaryText = Color(UIColor.tertiaryLabel)
         
-        // Glass effect colors
-        static let glassBackground = Color.glassBackground
+        // Card colors
+        static let cardBackground = Color(UIColor.secondarySystemBackground)
     }
     
     // MARK: - Gradients
@@ -72,22 +75,22 @@ struct DesignSystem {
     // MARK: - Shadows
     
     struct Shadows {
-        static let smallRadius: CGFloat = 8
-        static let mediumRadius: CGFloat = 16
-        static let largeRadius: CGFloat = 24
+        static let smallRadius: CGFloat = 2
+        static let mediumRadius: CGFloat = 4
+        static let largeRadius: CGFloat = 8
         
-        static let smallColor = Color.black.opacity(0.1)
-        static let mediumColor = Color.black.opacity(0.15)
-        static let largeColor = Color.black.opacity(0.2)
+        static let smallColor = Color.black.opacity(0.05)
+        static let mediumColor = Color.black.opacity(0.08)
+        static let largeColor = Color.black.opacity(0.12)
     }
     
     // MARK: - Corner Radius
     
     struct CornerRadius {
-        static let small: CGFloat = 12
-        static let medium: CGFloat = 20
-        static let large: CGFloat = 28
-        static let extraLarge: CGFloat = 36
+        static let small: CGFloat = 8
+        static let medium: CGFloat = 12
+        static let large: CGFloat = 16
+        static let extraLarge: CGFloat = 20
     }
     
     // MARK: - Spacing
@@ -106,22 +109,21 @@ struct DesignSystem {
 
 // MARK: - View Modifiers
 
-/// Glass morphism background modifier
-struct GlassBackground: ViewModifier {
+/// Card background modifier (replaces glass morphism)
+struct CardBackground: ViewModifier {
     let cornerRadius: CGFloat
     let shadowRadius: CGFloat
     
-    init(cornerRadius: CGFloat = DesignSystem.CornerRadius.medium, shadowRadius: CGFloat = 16) {
+    init(cornerRadius: CGFloat = DesignSystem.CornerRadius.medium, shadowRadius: CGFloat = 4) {
         self.cornerRadius = cornerRadius
         self.shadowRadius = shadowRadius
     }
     
     func body(content: Content) -> some View {
         content
-            .background(.ultraThinMaterial)
-            .background(DesignSystem.Colors.glassBackground)
+            .background(DesignSystem.Colors.cardBackground)
             .cornerRadius(cornerRadius)
-            .shadow(color: .black.opacity(0.1), radius: shadowRadius, x: 0, y: 8)
+            .shadow(color: Color.black.opacity(0.1), radius: shadowRadius, x: 0, y: 2)
     }
 }
 
@@ -143,12 +145,12 @@ struct GradientButtonStyle: ButtonStyle {
             .background(gradient)
             .cornerRadius(cornerRadius)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .shadow(color: .black.opacity(0.2), radius: configuration.isPressed ? 8 : 16, x: 0, y: configuration.isPressed ? 4 : 8)
+            .shadow(color: .black.opacity(0.15), radius: configuration.isPressed ? 2 : 4, x: 0, y: configuration.isPressed ? 1 : 2)
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
 
-/// Card view modifier with glass effect
+/// Card view modifier
 struct CardStyle: ViewModifier {
     let padding: CGFloat
     
@@ -159,22 +161,21 @@ struct CardStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(padding)
-            .background(.ultraThinMaterial)
-            .background(DesignSystem.Colors.glassBackground)
+            .background(DesignSystem.Colors.cardBackground)
             .cornerRadius(DesignSystem.CornerRadius.medium)
-            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+            .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
     }
 }
 
 // MARK: - View Extensions
 
 extension View {
-    /// Applies glass morphism background
-    func glassBackground(cornerRadius: CGFloat = DesignSystem.CornerRadius.medium, shadowRadius: CGFloat = 16) -> some View {
-        modifier(GlassBackground(cornerRadius: cornerRadius, shadowRadius: shadowRadius))
+    /// Applies card background (replaces glassBackground)
+    func cardBackground(cornerRadius: CGFloat = DesignSystem.CornerRadius.medium, shadowRadius: CGFloat = 4) -> some View {
+        modifier(CardBackground(cornerRadius: cornerRadius, shadowRadius: shadowRadius))
     }
     
-    /// Applies card styling with glass effect
+    /// Applies card styling
     func cardStyle(padding: CGFloat = DesignSystem.Spacing.medium) -> some View {
         modifier(CardStyle(padding: padding))
     }
@@ -182,6 +183,12 @@ extension View {
     /// Applies gradient background
     func gradientBackground(_ gradient: LinearGradient = DesignSystem.Gradients.primary) -> some View {
         self.background(gradient)
+    }
+    
+    /// Convenience method to replace glassBackground calls
+    func glassBackground(cornerRadius: CGFloat = DesignSystem.CornerRadius.medium, shadowRadius: CGFloat = 16) -> some View {
+        // Redirects to card background for compatibility
+        self.cardBackground(cornerRadius: cornerRadius, shadowRadius: shadowRadius)
     }
 }
 
@@ -226,7 +233,7 @@ struct FloatingActionButton: View {
                 .frame(width: 60, height: 60)
                 .background(gradient)
                 .cornerRadius(30)
-                .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 6)
+                .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
         }
     }
 }
@@ -269,7 +276,7 @@ struct GradientButton: View {
                 }
             )
             .cornerRadius(DesignSystem.CornerRadius.medium)
-            .shadow(color: isDisabled ? .clear : Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+            .shadow(color: isDisabled ? .clear : Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         }
         .disabled(isDisabled)
     }

@@ -60,20 +60,7 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [
-                        Color.clear,
-                        DesignSystem.Colors.primaryGradientStart.opacity(0.1),
-                        DesignSystem.Colors.primaryGradientEnd.opacity(0.05)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                
-                ScrollView {
+            ScrollView {
                     VStack(spacing: DesignSystem.Spacing.large) {
                         // Welcome Section
                         welcomeSection

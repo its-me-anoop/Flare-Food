@@ -24,19 +24,7 @@ struct AnalyticsView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [
-                        Color.clear,
-                        DesignSystem.Colors.accentGradientStart.opacity(0.05)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-                
-                ScrollView {
+            ScrollView {
                     VStack(spacing: DesignSystem.Spacing.large) {
                         // Controls Section
                         controlsSection
@@ -59,7 +47,6 @@ struct AnalyticsView: View {
                     }
                     .padding()
                 }
-            }
             .navigationTitle("Analytics")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {

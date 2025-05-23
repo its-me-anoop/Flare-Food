@@ -49,17 +49,6 @@ struct MealsListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [
-                        Color.clear,
-                        DesignSystem.Colors.primaryGradientStart.opacity(0.05)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-                
                 if meals.isEmpty {
                     emptyStateView
                 } else {
