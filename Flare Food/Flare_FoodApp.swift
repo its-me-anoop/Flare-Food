@@ -16,48 +16,10 @@ struct Flare_FoodApp: App {
     @State private var isAppReady = false
     
     /// Shared model container for SwiftData
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Food.self,
-            Meal.self,
-            FoodItem.self,
-            Symptom.self,
-            Correlation.self,
-            UserProfile.self,
-            MealReminderTime.self,
-            FluidEntry.self
-        ])
-        
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            cloudKitDatabase: .automatic
-        )
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            // If migration fails, try to delete the store and start fresh
-            print("Migration failed, attempting to delete store and start fresh: \(error)")
-            
-            // Delete the existing store
-            let storeURL = modelConfiguration.url
-            try? FileManager.default.removeItem(at: storeURL)
-            
-            // Also delete related files
-            let walURL = storeURL.appendingPathExtension("wal")
-            let shmURL = storeURL.appendingPathExtension("shm")
-            try? FileManager.default.removeItem(at: walURL)
-            try? FileManager.default.removeItem(at: shmURL)
-            
-            // Try creating the container again
-            do {
-                return try ModelContainer(for: schema, configurations: [modelConfiguration])
-            } catch {
-                fatalError("Could not create ModelContainer even after deleting store: \(error)")
-            }
-        }
-    }()
+    @MainActor
+    var sharedModelContainer: ModelContainer {
+        ModelContainerConfig.shared.container
+    }
 
     var body: some Scene {
         WindowGroup {

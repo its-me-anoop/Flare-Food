@@ -267,12 +267,19 @@ final class DataService: DataServiceProtocol {
         let profiles = try modelContext.fetch(descriptor)
         
         if let profile = profiles.first {
+            // Ensure active profile ID is synced to shared UserDefaults
+            if profile.isActive {
+                ModelContainerConfig.sharedDefaults?.set(profile.id.uuidString, forKey: "activeProfileId")
+            }
             return profile
         } else {
             // Create default profile if none exists
             let newProfile = UserProfile(isActive: true)
             modelContext.insert(newProfile)
             try modelContext.save()
+            
+            // Save active profile ID to shared UserDefaults
+            ModelContainerConfig.sharedDefaults?.set(newProfile.id.uuidString, forKey: "activeProfileId")
             return newProfile
         }
     }
@@ -281,6 +288,11 @@ final class DataService: DataServiceProtocol {
     /// - Parameter profile: The profile to save
     func saveUserProfile(_ profile: UserProfile) throws {
         try modelContext.save()
+        
+        // Save active profile ID to shared UserDefaults for widget access
+        if profile.isActive {
+            ModelContainerConfig.sharedDefaults?.set(profile.id.uuidString, forKey: "activeProfileId")
+        }
     }
     
     /// Gets the active profile ID
