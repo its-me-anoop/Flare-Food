@@ -10,6 +10,11 @@ import SwiftData
 
 @main
 struct Flare_FoodApp: App {
+    @StateObject private var authService = BiometricAuthService.shared
+    @State private var showSplash = true
+    @State private var showOnboarding = false
+    @State private var isAppReady = false
+    
     /// Shared model container for SwiftData
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -56,11 +61,34 @@ struct Flare_FoodApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .task {
-                    // Seed database on first launch
-                    await seedDatabaseIfNeeded()
+            ZStack {
+                if showSplash {
+                    SplashScreenView()
+                        .transition(.opacity)
+                } else if showOnboarding {
+                    OnboardingContainerView(isOnboardingComplete: Binding(
+                        get: { !showOnboarding },
+                        set: { showOnboarding = !$0 }
+                    ))
+                        .transition(.move(edge: .trailing))
+                } else if authService.isBiometricEnabled && !authService.isAuthenticated {
+                    BiometricLockView()
+                        .transition(.opacity)
+                } else if isAppReady {
+                    ContentView()
+                        .transition(.opacity)
                 }
+            }
+            .animation(.easeInOut(duration: 0.5), value: showSplash)
+            .animation(.easeInOut(duration: 0.5), value: showOnboarding)
+            .animation(.easeInOut(duration: 0.3), value: authService.isAuthenticated)
+            .task {
+                // Seed database on first launch
+                await seedDatabaseIfNeeded()
+                
+                // Handle app launch flow
+                await handleAppLaunch()
+            }
         }
         .modelContainer(sharedModelContainer)
         #if os(macOS)
@@ -102,6 +130,53 @@ struct Flare_FoodApp: App {
             }
         } catch {
             print("Error ensuring active profile: \(error)")
+        }
+    }
+    
+    /// Handle app launch flow
+    @MainActor
+    private func handleAppLaunch() async {
+        // Show splash screen for a minimum duration
+        try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+        
+        // Check if onboarding is complete
+        let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: UserDefaultsKeys.hasCompletedOnboarding)
+        
+        withAnimation {
+            showSplash = false
+            
+            if !hasCompletedOnboarding {
+                showOnboarding = true
+            } else {
+                // If biometric is enabled, the lock screen will show automatically
+                // Otherwise, show the main app
+                if !authService.isBiometricEnabled {
+                    isAppReady = true
+                }
+            }
+        }
+        
+        // If biometric is enabled and onboarding is complete, wait for authentication
+        if hasCompletedOnboarding && authService.isBiometricEnabled {
+            // Monitor authentication state
+            while !authService.isAuthenticated {
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            }
+            
+            withAnimation {
+                isAppReady = true
+            }
+        }
+        
+        // Monitor onboarding completion
+        if showOnboarding {
+            while showOnboarding {
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            }
+            
+            withAnimation {
+                isAppReady = true
+            }
         }
     }
 }

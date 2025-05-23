@@ -5,6 +5,17 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
+		<string>healthkit</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID to secure your health data and quickly access Flare Food</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Flare Food reads your caffeine and water intake data to provide comprehensive tracking</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Flare Food saves your caffeine and water intake to HealthKit for unified health tracking</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Add photos to your meal entries to better track your food intake</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take photos of your meals to add to your food diary</string>
 </dict>
 </plist>

@@ -7,15 +7,61 @@
 
 import SwiftUI
 import SwiftData
+import LocalAuthentication
 
 /// Settings view for app configuration
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(filter: #Predicate<UserProfile> { $0.isActive }) private var activeProfiles: [UserProfile]
+    @Query private var meals: [Meal]
+    @Query private var symptoms: [Symptom]
+    @Query private var beverages: [FluidEntry]
+    @Query private var correlations: [Correlation]
+    
     @State private var showingProfileManagement = false
+    @State private var showingPrivacyPolicy = false
+    @State private var showingTermsOfService = false
+    @State private var showingExportOptions = false
+    @State private var showingReportOptions = false
+    @State private var selectedExportFormat: DataExportService.ExportFormat = .csv
+    @State private var selectedReportDateRange: ReportDateRange = .lastMonth
+    @State private var showingShareSheet = false
+    @State private var exportedData: Data?
+    @State private var showingHealthKitPermission = false
+    
+    @StateObject private var biometricService = BiometricAuthService.shared
+    @StateObject private var healthKitService = HealthKitService.shared
     
     private var activeProfile: UserProfile? {
         activeProfiles.first
+    }
+    
+    enum ReportDateRange: String, CaseIterable {
+        case lastWeek = "Last Week"
+        case lastMonth = "Last Month"
+        case lastThreeMonths = "Last 3 Months"
+        case lastSixMonths = "Last 6 Months"
+        case lastYear = "Last Year"
+        case allTime = "All Time"
+        
+        var dateRange: (start: Date, end: Date) {
+            let calendar = Calendar.current
+            let now = Date()
+            switch self {
+            case .lastWeek:
+                return (calendar.date(byAdding: .weekOfYear, value: -1, to: now)!, now)
+            case .lastMonth:
+                return (calendar.date(byAdding: .month, value: -1, to: now)!, now)
+            case .lastThreeMonths:
+                return (calendar.date(byAdding: .month, value: -3, to: now)!, now)
+            case .lastSixMonths:
+                return (calendar.date(byAdding: .month, value: -6, to: now)!, now)
+            case .lastYear:
+                return (calendar.date(byAdding: .year, value: -1, to: now)!, now)
+            case .allTime:
+                return (Date.distantPast, now)
+            }
+        }
     }
     
     var body: some View {
@@ -117,11 +163,103 @@ struct SettingsView: View {
                     }
                 }
                 
+                // Security Section
+                Section("Security") {
+                    Toggle(biometricService.biometricTypeString, isOn: Binding(
+                        get: { activeProfile?.biometricAuthEnabled ?? false },
+                        set: { newValue in
+                            if let profile = activeProfile {
+                                profile.biometricAuthEnabled = newValue
+                                biometricService.isBiometricEnabled = newValue
+                                if newValue {
+                                    // Test authentication when enabling
+                                    Task {
+                                        let success = await biometricService.authenticate(reason: "Enable biometric authentication for Flare Food")
+                                        if !success {
+                                            // Revert if authentication failed
+                                            await MainActor.run {
+                                                profile.biometricAuthEnabled = false
+                                                biometricService.isBiometricEnabled = false
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ))
+                    .disabled(!biometricService.isAuthenticationAvailable)
+                    
+                    if !biometricService.isAuthenticationAvailable {
+                        Text("Biometric authentication is not available on this device")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                // HealthKit Section
+                Section("HealthKit") {
+                    Toggle("Sync to HealthKit", isOn: Binding(
+                        get: { activeProfile?.healthKitEnabled ?? false },
+                        set: { newValue in
+                            if let profile = activeProfile {
+                                if newValue && !healthKitService.isAuthorized {
+                                    showingHealthKitPermission = true
+                                } else {
+                                    profile.healthKitEnabled = newValue
+                                }
+                            }
+                        }
+                    ))
+                    
+                    if activeProfile?.healthKitEnabled ?? false {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Label("Syncing water intake", systemImage: "drop.fill")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Label("Syncing caffeine intake", systemImage: "cup.and.saucer.fill")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        if let lastSync = UserDefaults.standard.object(forKey: UserDefaultsKeys.lastHealthKitSync) as? Date {
+                            HStack {
+                                Text("Last synced")
+                                Spacer()
+                                Text(lastSync, style: .relative)
+                                    .foregroundColor(.secondary)
+                            }
+                            .font(.caption)
+                        }
+                    }
+                    
+                    if !healthKitService.isHealthKitAvailable {
+                        Text("HealthKit is not available on this device")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
                 // Data & Privacy Section
                 Section("Data & Privacy") {
                     Toggle("iCloud Sync", isOn: .constant(activeProfile?.iCloudSyncEnabled ?? true))
-                    Toggle("HealthKit Integration", isOn: .constant(activeProfile?.healthKitEnabled ?? false))
-                    Toggle("Face ID / Touch ID", isOn: .constant(activeProfile?.biometricAuthEnabled ?? false))
+                    
+                    Button {
+                        showingExportOptions = true
+                    } label: {
+                        Label("Export Data", systemImage: "square.and.arrow.up")
+                    }
+                    
+                    NavigationLink {
+                        PrivacyPolicyView()
+                    } label: {
+                        Label("Privacy Policy", systemImage: "hand.raised.fill")
+                    }
+                    
+                    NavigationLink {
+                        TermsOfServiceView()
+                    } label: {
+                        Label("Terms of Service", systemImage: "doc.text")
+                    }
                 }
                 
                 // Statistics Section
@@ -157,19 +295,22 @@ struct SettingsView: View {
                     }
                 }
                 
-                // Export Section
-                Section("Export Data") {
+                // Report Generation Section
+                Section("Reports") {
                     Button {
-                        // TODO: Export PDF report
+                        showingReportOptions = true
                     } label: {
-                        Label("Generate PDF Report", systemImage: "doc.text")
+                        Label("Generate PDF Report", systemImage: "doc.richtext")
+                            .foregroundColor(.accentColor)
                     }
                     
-                    Button {
-                        // TODO: Export raw data
-                    } label: {
-                        Label("Export Raw Data", systemImage: "square.and.arrow.up")
+                    HStack {
+                        Text("Include data from")
+                        Spacer()
+                        Text(selectedReportDateRange.rawValue)
+                            .foregroundColor(.secondary)
                     }
+                    .font(.caption)
                 }
                 
                 // About Section
@@ -181,18 +322,46 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                     
-                    Button("Privacy Policy") {
-                        // TODO: Show privacy policy
-                    }
-                    
-                    Button("Terms of Service") {
-                        // TODO: Show terms
+                    HStack {
+                        Text("Build")
+                        Spacer()
+                        Text("1")
+                            .foregroundColor(.secondary)
                     }
                 }
             }
             .navigationTitle("Settings")
             .onAppear {
                 ensureUserProfile()
+            }
+            .sheet(isPresented: $showingExportOptions) {
+                exportOptionsSheet
+            }
+            .sheet(isPresented: $showingReportOptions) {
+                reportOptionsSheet
+            }
+            .sheet(isPresented: $showingShareSheet) {
+                if let exportedData = exportedData {
+                    ShareSheet(items: [exportedData])
+                }
+            }
+            .alert("HealthKit Permission", isPresented: $showingHealthKitPermission) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Please grant HealthKit permission in Settings to sync your hydration data.")
+            }
+            .task {
+                if activeProfile?.healthKitEnabled ?? false && !healthKitService.isAuthorized {
+                    let authorized = await healthKitService.requestAuthorization()
+                    if authorized, let profile = activeProfile {
+                        profile.healthKitEnabled = true
+                    }
+                }
             }
         }
     }
@@ -205,7 +374,130 @@ struct SettingsView: View {
             modelContext.insert(profile)
         }
     }
+    
+    // MARK: - Sheet Views
+    
+    private var exportOptionsSheet: some View {
+        NavigationStack {
+            Form {
+                Section("Export Format") {
+                    ForEach(DataExportService.ExportFormat.allCases, id: \.self) { format in
+                        HStack {
+                            Text(format.rawValue)
+                            Spacer()
+                            if selectedExportFormat == format {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedExportFormat = format
+                        }
+                    }
+                }
+                
+                Section {
+                    Button("Export Data") {
+                        exportData()
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .navigationTitle("Export Options")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        showingExportOptions = false
+                    }
+                }
+            }
+        }
+    }
+    
+    private var reportOptionsSheet: some View {
+        NavigationStack {
+            Form {
+                Section("Date Range") {
+                    ForEach(ReportDateRange.allCases, id: \.self) { range in
+                        HStack {
+                            Text(range.rawValue)
+                            Spacer()
+                            if selectedReportDateRange == range {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedReportDateRange = range
+                        }
+                    }
+                }
+                
+                Section {
+                    Button("Generate Report") {
+                        generatePDFReport()
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .navigationTitle("Report Options")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Cancel") {
+                        showingReportOptions = false
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Export Methods
+    
+    private func exportData() {
+        let exportService = DataExportService.shared
+        
+        if let data = exportService.exportAllData(
+            meals: meals,
+            symptoms: symptoms,
+            beverages: beverages,
+            format: selectedExportFormat
+        ) {
+            exportedData = data
+            showingExportOptions = false
+            showingShareSheet = true
+        }
+    }
+    
+    private func generatePDFReport() {
+        let pdfService = PDFReportService.shared
+        let dateRange = selectedReportDateRange.dateRange
+        
+        // Filter data by date range
+        let filteredMeals = meals.filter { $0.timestamp >= dateRange.start && $0.timestamp <= dateRange.end }
+        let filteredSymptoms = symptoms.filter { $0.timestamp >= dateRange.start && $0.timestamp <= dateRange.end }
+        let filteredBeverages = beverages.filter { $0.timestamp >= dateRange.start && $0.timestamp <= dateRange.end }
+        let filteredCorrelations = correlations.filter { $0.lastCalculated >= dateRange.start }
+        
+        if let data = pdfService.generateReport(
+            from: dateRange.start,
+            to: dateRange.end,
+            meals: filteredMeals,
+            symptoms: filteredSymptoms,
+            beverages: filteredBeverages,
+            correlations: filteredCorrelations
+        ) {
+            exportedData = data
+            showingReportOptions = false
+            showingShareSheet = true
+        }
+    }
 }
+
+// ShareSheet is now defined in Views/Components/ShareSheet.swift
 
 #Preview {
     SettingsView()
@@ -216,6 +508,7 @@ struct SettingsView: View {
             Symptom.self,
             Correlation.self,
             UserProfile.self,
-            MealReminderTime.self
+            MealReminderTime.self,
+            FluidEntry.self
         ], inMemory: true)
 }

@@ -345,6 +345,14 @@ struct BeverageLoggingSheet: View {
             
             modelContext.insert(entry)
             try modelContext.save()
+            
+            // Sync to HealthKit if enabled
+            if UserDefaults.standard.bool(forKey: UserDefaultsKeys.isHealthKitEnabled) {
+                Task {
+                    await HealthKitService.shared.syncFluidEntry(entry)
+                }
+            }
+            
             dismiss()
         } catch {
             print("Error saving beverage entry: \(error)")
