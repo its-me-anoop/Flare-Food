@@ -386,8 +386,8 @@ private struct SymptomTrackingSheetContent: View {
     }
 }
 
-/// Trigger selection chip
-private struct TriggerChip: View {
+/// Trigger selection chip for symptoms
+private struct SymptomTriggerChip: View {
     let title: String
     let subtitle: String
     let isSelected: Bool
