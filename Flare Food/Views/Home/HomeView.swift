@@ -24,6 +24,40 @@ struct HomeView: View {
         userProfiles.first
     }
     
+    /// Calculate current streak from actual data
+    private var currentStreak: Int {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        // Combine all activity dates (meals and symptoms)
+        let mealDates = recentMeals.map { calendar.startOfDay(for: $0.timestamp) }
+        let symptomDates = recentSymptoms.map { calendar.startOfDay(for: $0.timestamp) }
+        
+        // Get unique dates with activity
+        let allDates = Set(mealDates + symptomDates).sorted(by: >)
+        
+        guard !allDates.isEmpty else { return 0 }
+        
+        // Check if there's activity today or yesterday
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+        guard allDates.contains(today) || allDates.contains(yesterday) else { return 0 }
+        
+        // Count consecutive days backwards from today
+        var streak = 0
+        var checkDate = today
+        
+        for date in allDates {
+            if date == checkDate {
+                streak += 1
+                checkDate = calendar.date(byAdding: .day, value: -1, to: checkDate)!
+            } else if date < checkDate {
+                break
+            }
+        }
+        
+        return streak
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -83,17 +117,15 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: DesignSystem.Spacing.xSmall) {
             GradientText(greeting, gradient: DesignSystem.Gradients.primary, font: .largeTitle.bold())
             
-            if let profile = userProfile {
-                if profile.currentStreak > 0 {
-                    HStack(spacing: DesignSystem.Spacing.xxSmall) {
-                        Image(systemName: "flame.fill")
-                            .foregroundStyle(DesignSystem.Gradients.primary)
-                        Text("\(profile.currentStreak) day streak!")
-                            .fontWeight(.medium)
-                            .foregroundColor(DesignSystem.Colors.secondaryText)
-                    }
-                    .font(.title3)
+            if currentStreak > 0 {
+                HStack(spacing: DesignSystem.Spacing.xxSmall) {
+                    Image(systemName: "flame.fill")
+                        .foregroundStyle(DesignSystem.Gradients.primary)
+                    Text("\(currentStreak) day streak!")
+                        .fontWeight(.medium)
+                        .foregroundColor(DesignSystem.Colors.secondaryText)
                 }
+                .font(.title3)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -105,14 +137,14 @@ struct HomeView: View {
         HStack(spacing: DesignSystem.Spacing.small) {
             StatCard(
                 title: "Meals Logged",
-                value: "\(userProfile?.totalMealsLogged ?? 0)",
+                value: "\(recentMeals.count)",
                 icon: "fork.knife",
                 gradient: DesignSystem.Gradients.primary
             )
             
             StatCard(
                 title: "Symptoms Tracked",
-                value: "\(userProfile?.totalSymptomsLogged ?? 0)",
+                value: "\(recentSymptoms.count)",
                 icon: "heart.text.square.fill",
                 gradient: DesignSystem.Gradients.secondary
             )
