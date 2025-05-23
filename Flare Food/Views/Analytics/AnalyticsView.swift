@@ -638,8 +638,8 @@ struct ChartTypeButton: View {
             .padding(.vertical, DesignSystem.Spacing.small)
             .background(
                 isSelected ? 
-                DesignSystem.Gradients.primary : 
-                Color.gray.opacity(0.2)
+                AnyView(DesignSystem.Gradients.primary) : 
+                AnyView(Color.gray.opacity(0.2))
             )
             .cornerRadius(DesignSystem.CornerRadius.small)
         }
@@ -762,8 +762,8 @@ struct CategoryFilterChip: View {
                 .padding(.vertical, DesignSystem.Spacing.xxSmall)
                 .background(
                     isSelected ?
-                    DesignSystem.Gradients.primary :
-                    Color.gray.opacity(0.2)
+                    AnyView(DesignSystem.Gradients.primary) :
+                    AnyView(Color.gray.opacity(0.2))
                 )
                 .foregroundColor(isSelected ? .white : DesignSystem.Colors.primaryText)
                 .cornerRadius(DesignSystem.CornerRadius.small)
