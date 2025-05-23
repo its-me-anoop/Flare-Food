@@ -19,6 +19,12 @@ struct HomeView: View {
     @State private var showingSymptomTracker = false
     @State private var selectedMeal: Meal?
     @State private var selectedSymptom: Symptom?
+    @State private var mealToEdit: Meal?
+    @State private var symptomToEdit: Symptom?
+    @State private var showingMealDeleteAlert = false
+    @State private var showingSymptomDeleteAlert = false
+    @State private var mealToDelete: Meal?
+    @State private var symptomToDelete: Symptom?
     
     private var userProfile: UserProfile? {
         userProfiles.first
@@ -72,6 +78,36 @@ struct HomeView: View {
             }
             .sheet(item: $selectedSymptom) { symptom in
                 SymptomDetailView(symptom: symptom)
+            }
+            .sheet(item: $mealToEdit) { meal in
+                MealEditSheet(meal: meal)
+            }
+            .sheet(item: $symptomToEdit) { symptom in
+                SymptomEditSheet(symptom: symptom)
+            }
+            .alert("Delete Meal", isPresented: $showingMealDeleteAlert) {
+                Button("Cancel", role: .cancel) {
+                    mealToDelete = nil
+                }
+                Button("Delete", role: .destructive) {
+                    if let meal = mealToDelete {
+                        deleteMeal(meal)
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to delete this meal? This action cannot be undone.")
+            }
+            .alert("Delete Symptom", isPresented: $showingSymptomDeleteAlert) {
+                Button("Cancel", role: .cancel) {
+                    symptomToDelete = nil
+                }
+                Button("Delete", role: .destructive) {
+                    if let symptom = symptomToDelete {
+                        deleteSymptom(symptom)
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to delete this symptom? This action cannot be undone.")
             }
         }
     }
@@ -132,37 +168,72 @@ struct HomeView: View {
                     icon: "chart.bar.doc.horizontal"
                 )
             } else {
-                VStack(spacing: 12) {
-                    // Recent Meals
+                List {
+                    // Recent Meals Section
                     if !recentMeals.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Recent Meals", systemImage: "clock")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
+                        Section {
                             ForEach(recentMeals.prefix(3)) { meal in
                                 RecentMealCard(meal: meal) {
                                     selectedMeal = meal
                                 }
+                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button(role: .destructive) {
+                                        mealToDelete = meal
+                                        showingMealDeleteAlert = true
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                    
+                                    Button {
+                                        mealToEdit = meal
+                                    } label: {
+                                        Label("Edit", systemImage: "pencil")
+                                    }
+                                    .tint(.orange)
+                                }
                             }
+                        } header: {
+                            Label("Recent Meals", systemImage: "clock")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
                     }
                     
-                    // Recent Symptoms
+                    // Recent Symptoms Section
                     if !recentSymptoms.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Recent Symptoms", systemImage: "clock")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
+                        Section {
                             ForEach(recentSymptoms.prefix(3)) { symptom in
                                 RecentSymptomCard(symptom: symptom) {
                                     selectedSymptom = symptom
                                 }
+                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button(role: .destructive) {
+                                        symptomToDelete = symptom
+                                        showingSymptomDeleteAlert = true
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                    
+                                    Button {
+                                        symptomToEdit = symptom
+                                    } label: {
+                                        Label("Edit", systemImage: "pencil")
+                                    }
+                                    .tint(.purple)
+                                }
                             }
+                        } header: {
+                            Label("Recent Symptoms", systemImage: "clock")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .frame(height: CGFloat((recentMeals.prefix(3).count + recentSymptoms.prefix(3).count) * 70 + 100))
             }
         }
     }
@@ -217,6 +288,18 @@ struct HomeView: View {
             let profile = UserProfile()
             modelContext.insert(profile)
         }
+    }
+    
+    /// Delete a meal
+    private func deleteMeal(_ meal: Meal) {
+        modelContext.delete(meal)
+        mealToDelete = nil
+    }
+    
+    /// Delete a symptom
+    private func deleteSymptom(_ symptom: Symptom) {
+        modelContext.delete(symptom)
+        symptomToDelete = nil
     }
 }
 
