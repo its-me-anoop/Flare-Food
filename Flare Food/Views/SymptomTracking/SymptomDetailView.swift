@@ -348,8 +348,8 @@ struct SymptomDetailView: View {
 #Preview {
     SymptomDetailView(symptom: Symptom(
         type: .bloating,
-        severity: 7,
         timestamp: Date(),
+        severity: 7,
         durationMinutes: 45,
         notes: "Felt bloated after lunch, possibly from the dairy products"
     ))
