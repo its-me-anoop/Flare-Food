@@ -17,6 +17,8 @@ struct HomeView: View {
     
     @State private var showingMealLogger = false
     @State private var showingSymptomTracker = false
+    @State private var selectedMeal: Meal?
+    @State private var selectedSymptom: Symptom?
     
     private var userProfile: UserProfile? {
         userProfiles.first
@@ -64,6 +66,12 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showingSymptomTracker) {
                 SymptomTrackingSheet()
+            }
+            .sheet(item: $selectedMeal) { meal in
+                MealDetailView(meal: meal)
+            }
+            .sheet(item: $selectedSymptom) { symptom in
+                SymptomDetailView(symptom: symptom)
             }
         }
     }
@@ -113,61 +121,48 @@ struct HomeView: View {
     
     /// Recent activity section
     private var recentActivitySection: some View {
-        VStack(alignment: .leading, spacing: DesignSystem.Spacing.medium) {
-            HStack {
-                Text("Recent Activity")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-                
-                NavigationLink(destination: TabView {
-                    MealsListView()
-                        .tabItem {
-                            Label("Meals", systemImage: "fork.knife")
-                        }
-                    
-                    SymptomsListView()
-                        .tabItem {
-                            Label("Symptoms", systemImage: "heart.text.square")
-                        }
-                }) {
-                    Text("View All")
-                        .font(.subheadline)
-                        .foregroundColor(DesignSystem.Colors.primaryGradientStart)
-                }
-            }
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Recent Activity")
+                .font(.headline)
             
             if recentMeals.isEmpty && recentSymptoms.isEmpty {
-                EmptyActivityCard()
+                EmptyStateCard(
+                    title: "No Activity Yet",
+                    message: "Start by logging your first meal or symptom",
+                    icon: "chart.bar.doc.horizontal"
+                )
             } else {
-                // Combined timeline
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: DesignSystem.Spacing.medium) {
-                        ForEach(combinedRecentActivity.prefix(5)) { item in
-                            RecentActivityCard(item: item)
-                                .frame(width: 280)
+                VStack(spacing: 12) {
+                    // Recent Meals
+                    if !recentMeals.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label("Recent Meals", systemImage: "clock")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            ForEach(recentMeals.prefix(3)) { meal in
+                                RecentMealCard(meal: meal) {
+                                    selectedMeal = meal
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Recent Symptoms
+                    if !recentSymptoms.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label("Recent Symptoms", systemImage: "clock")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            ForEach(recentSymptoms.prefix(3)) { symptom in
+                                RecentSymptomCard(symptom: symptom) {
+                                    selectedSymptom = symptom
+                                }
+                            }
                         }
                     }
                 }
-                
-                // Summary stats
-                HStack(spacing: DesignSystem.Spacing.small) {
-                    ActivitySummaryChip(
-                        title: "Today's Meals",
-                        count: todaysMealsCount,
-                        icon: "fork.knife",
-                        gradient: DesignSystem.Gradients.primary
-                    )
-                    
-                    ActivitySummaryChip(
-                        title: "Today's Symptoms",
-                        count: todaysSymptomsCount,
-                        icon: "heart.text.square",
-                        gradient: DesignSystem.Gradients.secondary
-                    )
-                }
-                .padding(.top, DesignSystem.Spacing.xSmall)
             }
         }
     }
@@ -216,73 +211,11 @@ struct HomeView: View {
         }
     }
     
-    /// Combined recent activity items
-    private var combinedRecentActivity: [ActivityItem] {
-        var items: [ActivityItem] = []
-        
-        // Add recent meals
-        items.append(contentsOf: recentMeals.prefix(5).map { ActivityItem.meal($0) })
-        
-        // Add recent symptoms
-        items.append(contentsOf: recentSymptoms.prefix(5).map { ActivityItem.symptom($0) })
-        
-        // Sort by timestamp
-        return items.sorted { item1, item2 in
-            switch (item1, item2) {
-            case (.meal(let meal1), .meal(let meal2)):
-                return meal1.timestamp > meal2.timestamp
-            case (.symptom(let symptom1), .symptom(let symptom2)):
-                return symptom1.timestamp > symptom2.timestamp
-            case (.meal(let meal), .symptom(let symptom)):
-                return meal.timestamp > symptom.timestamp
-            case (.symptom(let symptom), .meal(let meal)):
-                return symptom.timestamp > meal.timestamp
-            }
-        }
-    }
-    
-    /// Today's meals count
-    private var todaysMealsCount: Int {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        
-        return recentMeals.filter { meal in
-            calendar.isDate(meal.timestamp, inSameDayAs: today)
-        }.count
-    }
-    
-    /// Today's symptoms count
-    private var todaysSymptomsCount: Int {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        
-        return recentSymptoms.filter { symptom in
-            calendar.isDate(symptom.timestamp, inSameDayAs: today)
-        }.count
-    }
-    
     /// Ensures a user profile exists
     private func ensureUserProfile() {
         if userProfiles.isEmpty {
             let profile = UserProfile()
             modelContext.insert(profile)
-        }
-    }
-}
-
-// MARK: - Supporting Types
-
-/// Enum to represent activity items
-enum ActivityItem: Identifiable {
-    case meal(Meal)
-    case symptom(Symptom)
-    
-    var id: String {
-        switch self {
-        case .meal(let meal):
-            return "meal-\(meal.id)"
-        case .symptom(let symptom):
-            return "symptom-\(symptom.id)"
         }
     }
 }
@@ -317,173 +250,86 @@ struct StatCard: View {
     }
 }
 
-/// Enhanced recent activity card
-struct RecentActivityCard: View {
-    let item: ActivityItem
-    @State private var isPressed = false
+/// Recent meal card
+struct RecentMealCard: View {
+    let meal: Meal
+    let onTap: () -> Void
     
     var body: some View {
-        NavigationLink(destination: destinationView) {
-            VStack(alignment: .leading, spacing: DesignSystem.Spacing.small) {
-                // Header
-                HStack {
-                    // Icon
-                    Image(systemName: icon)
-                        .font(.title2)
-                        .foregroundStyle(gradient)
-                        .frame(width: 50, height: 50)
-                        .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
+        Button(action: onTap) {
+            HStack {
+                Image(systemName: meal.type.icon)
+                    .font(.title2)
+                    .foregroundStyle(DesignSystem.Gradients.primary)
+                    .frame(width: 44, height: 44)
+                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(meal.type.rawValue)
+                        .font(.headline)
+                        .foregroundColor(DesignSystem.Colors.primaryText)
                     
-                    Spacer()
-                    
-                    // Time
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text(timestamp, style: .time)
-                            .font(.headline)
-                        Text(relativeTime)
+                    if !meal.foodItems.isEmpty {
+                        Text(meal.foodItems.prefix(2).compactMap { $0.food?.name }.joined(separator: ", "))
                             .font(.caption)
+                            .foregroundColor(DesignSystem.Colors.secondaryText)
+                            .lineLimit(1)
+                    }
+                }
+                
+                Spacer()
+                
+                Text(meal.timestamp, style: .time)
+                    .font(.caption)
+                    .foregroundColor(DesignSystem.Colors.secondaryText)
+            }
+            .padding(DesignSystem.Spacing.small)
+            .glassBackground()
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+/// Recent symptom card
+struct RecentSymptomCard: View {
+    let symptom: Symptom
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                Image(systemName: symptom.type.category.icon)
+                    .font(.title2)
+                    .foregroundStyle(DesignSystem.Gradients.secondary)
+                    .frame(width: 44, height: 44)
+                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(symptom.type.rawValue)
+                        .font(.headline)
+                        .foregroundColor(DesignSystem.Colors.primaryText)
+                    
+                    HStack {
+                        Text("Severity: \(Int(symptom.severity))/10")
+                            .font(.caption)
+                        
+                        Circle()
+                            .fill(severityGradient(for: symptom.severityLevel))
+                            .frame(width: 8, height: 8)
                     }
                     .foregroundColor(DesignSystem.Colors.secondaryText)
                 }
                 
-                // Title
-                Text(title)
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(DesignSystem.Colors.primaryText)
+                Spacer()
                 
-                // Details
-                detailsView
-                    .font(.subheadline)
+                Text(symptom.timestamp, style: .time)
+                    .font(.caption)
                     .foregroundColor(DesignSystem.Colors.secondaryText)
-                
-                // Footer
-                footerView
             }
-            .padding(DesignSystem.Spacing.medium)
-            .frame(maxWidth: .infinity)
+            .padding(DesignSystem.Spacing.small)
             .glassBackground()
-            .scaleEffect(isPressed ? 0.98 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: isPressed)
         }
         .buttonStyle(PlainButtonStyle())
-        .onLongPressGesture(minimumDuration: 0.1, maximumDistance: .infinity) {
-            // On press
-        } onPressingChanged: { pressing in
-            isPressed = pressing
-        }
-    }
-    
-    private var destinationView: some View {
-        Group {
-            switch item {
-            case .meal(let meal):
-                MealDetailView(meal: meal)
-            case .symptom(let symptom):
-                SymptomDetailView(symptom: symptom)
-            }
-        }
-    }
-    
-    private var icon: String {
-        switch item {
-        case .meal(let meal):
-            return meal.type.icon
-        case .symptom(let symptom):
-            return symptom.type.icon
-        }
-    }
-    
-    private var gradient: LinearGradient {
-        switch item {
-        case .meal:
-            return DesignSystem.Gradients.primary
-        case .symptom:
-            return DesignSystem.Gradients.secondary
-        }
-    }
-    
-    private var timestamp: Date {
-        switch item {
-        case .meal(let meal):
-            return meal.timestamp
-        case .symptom(let symptom):
-            return symptom.timestamp
-        }
-    }
-    
-    private var relativeTime: String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: timestamp, relativeTo: Date())
-    }
-    
-    private var title: String {
-        switch item {
-        case .meal(let meal):
-            return meal.type.rawValue
-        case .symptom(let symptom):
-            return symptom.type.rawValue
-        }
-    }
-    
-    @ViewBuilder
-    private var detailsView: some View {
-        switch item {
-        case .meal(let meal):
-            if !meal.foodItems.isEmpty {
-                Text(meal.foodItems.prefix(3).compactMap { $0.food?.name }.joined(separator: " • "))
-                    .lineLimit(2)
-            }
-        case .symptom(let symptom):
-            HStack(spacing: DesignSystem.Spacing.small) {
-                Label("\(Int(symptom.severity))/10", systemImage: "gauge")
-                
-                Circle()
-                    .fill(severityGradient(for: symptom.severityLevel))
-                    .frame(width: 8, height: 8)
-                
-                Text("•")
-                
-                Text(symptom.type.category.rawValue)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private var footerView: some View {
-        HStack {
-            switch item {
-            case .meal(let meal):
-                if meal.photoData != nil {
-                    Label("Photo", systemImage: "camera.fill")
-                        .font(.caption)
-                        .foregroundColor(DesignSystem.Colors.primaryGradientStart)
-                }
-                if let notes = meal.notes, !notes.isEmpty {
-                    Label("Notes", systemImage: "note.text")
-                        .font(.caption)
-                        .foregroundColor(DesignSystem.Colors.primaryGradientStart)
-                }
-            case .symptom(let symptom):
-                if let duration = symptom.durationMinutes {
-                    Label("\(duration) min", systemImage: "clock")
-                        .font(.caption)
-                        .foregroundColor(DesignSystem.Colors.secondaryGradientStart)
-                }
-                if symptom.notes != nil {
-                    Label("Notes", systemImage: "note.text")
-                        .font(.caption)
-                        .foregroundColor(DesignSystem.Colors.secondaryGradientStart)
-                }
-            }
-            
-            Spacer()
-            
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(DesignSystem.Colors.secondaryText)
-        }
     }
     
     private func severityGradient(for level: Symptom.SeverityLevel) -> LinearGradient {
@@ -497,66 +343,6 @@ struct RecentActivityCard: View {
         case .verySevere:
             return DesignSystem.Gradients.secondary
         }
-    }
-}
-
-/// Activity summary chip
-struct ActivitySummaryChip: View {
-    let title: String
-    let count: Int
-    let icon: String
-    let gradient: LinearGradient
-    
-    var body: some View {
-        HStack(spacing: DesignSystem.Spacing.xSmall) {
-            Image(systemName: icon)
-                .font(.caption)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.caption2)
-                    .foregroundColor(DesignSystem.Colors.secondaryText)
-                
-                Text("\(count)")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-            }
-            
-            Spacer()
-        }
-        .padding(.horizontal, DesignSystem.Spacing.small)
-        .padding(.vertical, DesignSystem.Spacing.xSmall)
-        .frame(maxWidth: .infinity)
-        .glassBackground()
-        .overlay(
-            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.small)
-                .stroke(gradient.opacity(0.3), lineWidth: 1)
-        )
-    }
-}
-
-/// Empty activity card
-struct EmptyActivityCard: View {
-    var body: some View {
-        VStack(spacing: DesignSystem.Spacing.medium) {
-            Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: 60))
-                .foregroundStyle(DesignSystem.Gradients.accent)
-            
-            VStack(spacing: DesignSystem.Spacing.xSmall) {
-                Text("No Activity Yet")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Text("Start tracking your meals and symptoms to see patterns")
-                    .font(.subheadline)
-                    .foregroundColor(DesignSystem.Colors.secondaryText)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(DesignSystem.Spacing.xLarge)
-        .glassBackground()
     }
 }
 
