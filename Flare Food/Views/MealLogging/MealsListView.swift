@@ -226,6 +226,11 @@ struct MealsListView: View {
     /// Delete a meal
     private func deleteMeal(_ meal: Meal) {
         modelContext.delete(meal)
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to delete meal: \(error)")
+        }
         mealToDelete = nil
     }
 }
@@ -466,6 +471,11 @@ struct MealDetailView: View {
     /// Delete the meal
     private func deleteMeal() {
         modelContext.delete(meal)
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to delete meal: \(error)")
+        }
         dismiss()
     }
 }

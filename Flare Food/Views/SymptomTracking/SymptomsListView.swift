@@ -190,6 +190,11 @@ struct SymptomsListView: View {
     /// Delete a symptom
     private func deleteSymptom(_ symptom: Symptom) {
         modelContext.delete(symptom)
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to delete symptom: \(error)")
+        }
         symptomToDelete = nil
     }
     

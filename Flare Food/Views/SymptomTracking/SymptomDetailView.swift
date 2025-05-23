@@ -377,6 +377,11 @@ struct SymptomDetailView: View {
     /// Delete the symptom
     private func deleteSymptom() {
         modelContext.delete(symptom)
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to delete symptom: \(error)")
+        }
         dismiss()
     }
 }
