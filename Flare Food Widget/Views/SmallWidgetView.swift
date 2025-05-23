@@ -73,5 +73,5 @@ struct StatRow: View {
 #Preview(as: .systemSmall) {
     FlareFoodWidget()
 } timeline: {
-    SimpleEntry(date: .now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
+    SimpleEntry(date: Date.now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
 }

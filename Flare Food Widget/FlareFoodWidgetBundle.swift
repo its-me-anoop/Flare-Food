@@ -12,5 +12,6 @@ import SwiftUI
 struct FlareFoodWidgetBundle: WidgetBundle {
     var body: some Widget {
         FlareFoodWidget()
+        TestWidget()
     }
 }

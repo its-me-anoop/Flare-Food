@@ -10,27 +10,28 @@ import SwiftUI
 import SwiftData
 
 struct Provider: TimelineProvider {
-    @MainActor
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(), meals: [], symptoms: [], beverages: [], totalMeals: 0, totalSymptoms: 0, totalFluid: 0)
     }
     
-    @MainActor
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = getEntry(for: Date())
-        completion(entry)
+        Task { @MainActor in
+            let entry = getEntry(for: Date())
+            completion(entry)
+        }
     }
     
-    @MainActor
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        let currentDate = Date()
-        let entry = getEntry(for: currentDate)
-        
-        // Update every 30 minutes
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: currentDate)!
-        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
-        
-        completion(timeline)
+        Task { @MainActor in
+            let currentDate = Date()
+            let entry = getEntry(for: currentDate)
+            
+            // Update every 30 minutes
+            let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: currentDate)!
+            let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
+            
+            completion(timeline)
+        }
     }
     
     @MainActor
@@ -121,17 +122,17 @@ struct FlareFoodWidget: Widget {
 #Preview(as: .systemSmall) {
     FlareFoodWidget()
 } timeline: {
-    SimpleEntry(date: .now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
+    SimpleEntry(date: Date.now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
 }
 
 #Preview(as: .systemMedium) {
     FlareFoodWidget()
 } timeline: {
-    SimpleEntry(date: .now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
+    SimpleEntry(date: Date.now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
 }
 
 #Preview(as: .systemLarge) {
     FlareFoodWidget()
 } timeline: {
-    SimpleEntry(date: .now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
+    SimpleEntry(date: Date.now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
 }

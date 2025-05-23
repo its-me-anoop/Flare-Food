@@ -82,7 +82,7 @@ struct MediumWidgetView: View {
                         ForEach(recentMeals.prefix(3)) { meal in
                             HStack {
                                 Circle()
-                                    .fill(mealTypeColor(meal.mealType))
+                                    .fill(mealTypeColor(Meal.MealType(rawValue: meal.mealType) ?? .other))
                                     .frame(width: 6, height: 6)
                                 
                                 VStack(alignment: .leading, spacing: 2) {
@@ -90,7 +90,7 @@ struct MediumWidgetView: View {
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                     
-                                    if let firstFood = meal.foods.first {
+                                    if let firstFood = meal.foodItems.first {
                                         Text(firstFood.food?.name ?? "Unknown")
                                             .font(.caption)
                                             .lineLimit(1)
@@ -116,6 +116,7 @@ struct MediumWidgetView: View {
         case .lunch: return .green
         case .dinner: return .blue
         case .snack: return .purple
+        case .other: return .gray
         }
     }
 }
@@ -123,5 +124,5 @@ struct MediumWidgetView: View {
 #Preview(as: .systemMedium) {
     FlareFoodWidget()
 } timeline: {
-    SimpleEntry(date: .now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
+    SimpleEntry(date: Date.now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
 }

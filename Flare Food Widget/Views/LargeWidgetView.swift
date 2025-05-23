@@ -136,7 +136,7 @@ struct MealRow: View {
     var body: some View {
         HStack {
             Circle()
-                .fill(mealTypeColor(meal.mealType))
+                .fill(mealTypeColor(Meal.MealType(rawValue: meal.mealType) ?? .other))
                 .frame(width: 8, height: 8)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -144,14 +144,14 @@ struct MealRow: View {
                     .font(.caption2)
                     .foregroundColor(.secondary)
                 
-                Text(meal.foods.compactMap { $0.food?.name }.joined(separator: ", "))
+                Text(meal.foodItems.compactMap { $0.food?.name }.joined(separator: ", "))
                     .font(.caption)
                     .lineLimit(1)
             }
             
             Spacer()
             
-            Text(meal.mealType.rawValue)
+            Text(meal.mealType)
                 .font(.caption2)
                 .foregroundColor(.secondary)
                 .padding(.horizontal, 6)
@@ -168,6 +168,7 @@ struct MealRow: View {
         case .lunch: return .green
         case .dinner: return .blue
         case .snack: return .purple
+        case .other: return .gray
         }
     }
 }
@@ -178,7 +179,7 @@ struct SymptomRow: View {
     var body: some View {
         HStack {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(severityColor(symptom.severity))
+                .foregroundColor(severityColor(symptom.severityLevel))
                 .font(.caption)
             
             VStack(alignment: .leading, spacing: 2) {
@@ -186,25 +187,26 @@ struct SymptomRow: View {
                     .font(.caption2)
                     .foregroundColor(.secondary)
                 
-                Text(symptom.name)
+                Text(symptom.symptomType)
                     .font(.caption)
                     .lineLimit(1)
             }
             
             Spacer()
             
-            Text(symptom.severity.rawValue)
+            Text(symptom.severityLevel.rawValue)
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
         .padding(.vertical, 4)
     }
     
-    private func severityColor(_ severity: Symptom.Severity) -> Color {
+    private func severityColor(_ severity: Symptom.SeverityLevel) -> Color {
         switch severity {
         case .mild: return .green
         case .moderate: return .orange
         case .severe: return .red
+        case .verySevere: return .red
         }
     }
 }
@@ -212,5 +214,5 @@ struct SymptomRow: View {
 #Preview(as: .systemLarge) {
     FlareFoodWidget()
 } timeline: {
-    SimpleEntry(date: .now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
+    SimpleEntry(date: Date.now, meals: [], symptoms: [], beverages: [], totalMeals: 3, totalSymptoms: 1, totalFluid: 1500)
 }

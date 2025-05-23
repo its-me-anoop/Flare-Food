@@ -6,7 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6E7AB5832DE12665006AB32D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E7AB5822DE12665006AB32D /* WidgetKit.framework */; };
+		6E7AB5852DE12665006AB32D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E7AB5842DE12665006AB32D /* SwiftUI.framework */; };
+		6E7AB5962DE12668006AB32D /* Flare Food WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6E7AB5802DE12665006AB32D /* Flare Food WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		6E7AB5942DE12668006AB32D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6EC567C82DDFB28800EA8093 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6E7AB57F2DE12664006AB32D;
+			remoteInfo = "Flare Food WidgetExtension";
+		};
 		6EC567E22DDFB29000EA8093 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6EC567C82DDFB28800EA8093 /* Project object */;
@@ -23,13 +36,51 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		6E7AB59B2DE12668006AB32D /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6E7AB5962DE12668006AB32D /* Flare Food WidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		6E7AB5802DE12665006AB32D /* Flare Food WidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Flare Food WidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6E7AB5822DE12665006AB32D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		6E7AB5842DE12665006AB32D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		6E7AB5AC2DE126EF006AB32D /* Flare Food WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Flare Food WidgetExtension.entitlements"; sourceTree = "<group>"; };
 		6EC567D02DDFB28800EA8093 /* Flare Food.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Flare Food.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EC567E12DDFB29000EA8093 /* Flare FoodTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Flare FoodTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EC567EB2DDFB29000EA8093 /* Flare FoodUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Flare FoodUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6E7AB59A2DE12668006AB32D /* Exceptions for "Flare Food Widget" folder in "Flare Food WidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6E7AB57F2DE12664006AB32D /* Flare Food WidgetExtension */;
+		};
+		6E7AB5B42DE12A2A006AB32D /* Exceptions for "Flare Food" folder in "Flare Food WidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/Correlation.swift,
+				Models/FluidEntry.swift,
+				Models/Food.swift,
+				Models/Meal.swift,
+				Models/Symptom.swift,
+				Models/UserProfile.swift,
+				Utilities/ModelContainerConfig.swift,
+			);
+			target = 6E7AB57F2DE12664006AB32D /* Flare Food WidgetExtension */;
+		};
 		6EC567F32DDFB29000EA8093 /* Exceptions for "Flare Food" folder in "Flare Food" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -40,10 +91,19 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		6E7AB5862DE12665006AB32D /* Flare Food Widget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6E7AB59A2DE12668006AB32D /* Exceptions for "Flare Food Widget" folder in "Flare Food WidgetExtension" target */,
+			);
+			path = "Flare Food Widget";
+			sourceTree = "<group>";
+		};
 		6EC567D22DDFB28800EA8093 /* Flare Food */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				6EC567F32DDFB29000EA8093 /* Exceptions for "Flare Food" folder in "Flare Food" target */,
+				6E7AB5B42DE12A2A006AB32D /* Exceptions for "Flare Food" folder in "Flare Food WidgetExtension" target */,
 			);
 			path = "Flare Food";
 			sourceTree = "<group>";
@@ -61,6 +121,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		6E7AB57D2DE12664006AB32D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E7AB5852DE12665006AB32D /* SwiftUI.framework in Frameworks */,
+				6E7AB5832DE12665006AB32D /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6EC567CD2DDFB28800EA8093 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -85,12 +154,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6E7AB5812DE12665006AB32D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6E7AB5822DE12665006AB32D /* WidgetKit.framework */,
+				6E7AB5842DE12665006AB32D /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		6EC567C72DDFB28800EA8093 = {
 			isa = PBXGroup;
 			children = (
+				6E7AB5AC2DE126EF006AB32D /* Flare Food WidgetExtension.entitlements */,
 				6EC567D22DDFB28800EA8093 /* Flare Food */,
 				6EC567E42DDFB29000EA8093 /* Flare FoodTests */,
 				6EC567EE2DDFB29000EA8093 /* Flare FoodUITests */,
+				6E7AB5862DE12665006AB32D /* Flare Food Widget */,
+				6E7AB5812DE12665006AB32D /* Frameworks */,
 				6EC567D12DDFB28800EA8093 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -101,6 +182,7 @@
 				6EC567D02DDFB28800EA8093 /* Flare Food.app */,
 				6EC567E12DDFB29000EA8093 /* Flare FoodTests.xctest */,
 				6EC567EB2DDFB29000EA8093 /* Flare FoodUITests.xctest */,
+				6E7AB5802DE12665006AB32D /* Flare Food WidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,6 +190,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		6E7AB57F2DE12664006AB32D /* Flare Food WidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6E7AB5972DE12668006AB32D /* Build configuration list for PBXNativeTarget "Flare Food WidgetExtension" */;
+			buildPhases = (
+				6E7AB57C2DE12664006AB32D /* Sources */,
+				6E7AB57D2DE12664006AB32D /* Frameworks */,
+				6E7AB57E2DE12664006AB32D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6E7AB5862DE12665006AB32D /* Flare Food Widget */,
+			);
+			name = "Flare Food WidgetExtension";
+			packageProductDependencies = (
+			);
+			productName = "Flare Food WidgetExtension";
+			productReference = 6E7AB5802DE12665006AB32D /* Flare Food WidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		6EC567CF2DDFB28800EA8093 /* Flare Food */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6EC567F42DDFB29000EA8093 /* Build configuration list for PBXNativeTarget "Flare Food" */;
@@ -115,10 +219,12 @@
 				6EC567CC2DDFB28800EA8093 /* Sources */,
 				6EC567CD2DDFB28800EA8093 /* Frameworks */,
 				6EC567CE2DDFB28800EA8093 /* Resources */,
+				6E7AB59B2DE12668006AB32D /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				6E7AB5952DE12668006AB32D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6EC567D22DDFB28800EA8093 /* Flare Food */,
@@ -186,6 +292,9 @@
 				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
+					6E7AB57F2DE12664006AB32D = {
+						CreatedOnToolsVersion = 16.3;
+					};
 					6EC567CF2DDFB28800EA8093 = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -216,11 +325,19 @@
 				6EC567CF2DDFB28800EA8093 /* Flare Food */,
 				6EC567E02DDFB29000EA8093 /* Flare FoodTests */,
 				6EC567EA2DDFB29000EA8093 /* Flare FoodUITests */,
+				6E7AB57F2DE12664006AB32D /* Flare Food WidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6E7AB57E2DE12664006AB32D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6EC567CE2DDFB28800EA8093 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -245,6 +362,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		6E7AB57C2DE12664006AB32D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6EC567CC2DDFB28800EA8093 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -269,6 +393,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		6E7AB5952DE12668006AB32D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6E7AB57F2DE12664006AB32D /* Flare Food WidgetExtension */;
+			targetProxy = 6E7AB5942DE12668006AB32D /* PBXContainerItemProxy */;
+		};
 		6EC567E32DDFB29000EA8093 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6EC567CF2DDFB28800EA8093 /* Flare Food */;
@@ -282,6 +411,67 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		6E7AB5982DE12668006AB32D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Flare Food WidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K6623R3GP5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Flare Food Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Flare Food Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "co.uk.flutterly.Flare-Food.Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6E7AB5992DE12668006AB32D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Flare Food WidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K6623R3GP5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Flare Food Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Flare Food Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "co.uk.flutterly.Flare-Food.Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		6EC567F52DDFB29000EA8093 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -571,6 +761,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		6E7AB5972DE12668006AB32D /* Build configuration list for PBXNativeTarget "Flare Food WidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E7AB5982DE12668006AB32D /* Debug */,
+				6E7AB5992DE12668006AB32D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		6EC567CB2DDFB28800EA8093 /* Build configuration list for PBXProject "Flare Food" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
