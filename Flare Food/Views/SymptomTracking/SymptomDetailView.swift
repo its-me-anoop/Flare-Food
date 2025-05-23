@@ -350,8 +350,8 @@ struct SymptomDetailView: View {
         type: .bloating,
         timestamp: Date(),
         severity: 7,
-        durationMinutes: 45,
-        notes: "Felt bloated after lunch, possibly from the dairy products"
+        notes: "Felt bloated after lunch, possibly from the dairy products",
+        durationMinutes: 45
     ))
     .modelContainer(for: [
         Food.self,
