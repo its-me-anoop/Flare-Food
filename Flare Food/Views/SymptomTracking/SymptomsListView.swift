@@ -129,20 +129,13 @@ struct SymptomsListView: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        Button(action: {
+                        FloatingActionButton(
+                            icon: "plus",
+                            gradient: DesignSystem.Gradients.secondary
+                        ) {
                             showingSymptomTracker = true
-                        }) {
-                            Image(systemName: "plus")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .frame(width: 60, height: 60)
-                                .background(DesignSystem.Gradients.secondary)
-                                .clipShape(Circle())
-                                .shadow(color: DesignSystem.Colors.secondaryGradientEnd.opacity(0.3), radius: 12, x: 0, y: 6)
                         }
-                        .padding(.trailing, DesignSystem.Spacing.large)
-                        .padding(.bottom, DesignSystem.Spacing.large)
+                        .padding()
                     }
                 }
             }

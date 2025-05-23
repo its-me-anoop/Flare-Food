@@ -34,6 +34,12 @@ struct ContentView: View {
                     }
                     .tag(Tab.symptoms)
                 
+                BeveragesListView()
+                    .tabItem {
+                        Label("Beverages", systemImage: "drop.fill")
+                    }
+                    .tag(Tab.beverages)
+                
                 AnalyticsView()
                     .tabItem {
                         Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
@@ -63,6 +69,8 @@ struct ContentView: View {
                 MealsListView()
             case .symptoms:
                 SymptomsListView()
+            case .beverages:
+                BeveragesListView()
             case .analytics:
                 AnalyticsView()
             case .settings:
@@ -78,6 +86,7 @@ enum Tab: String, CaseIterable {
     case home
     case meals
     case symptoms
+    case beverages
     case analytics
     case settings
     
@@ -86,6 +95,7 @@ enum Tab: String, CaseIterable {
         case .home: return "Home"
         case .meals: return "Meals"
         case .symptoms: return "Symptoms"
+        case .beverages: return "Beverages"
         case .analytics: return "Analytics"
         case .settings: return "Settings"
         }
@@ -96,6 +106,7 @@ enum Tab: String, CaseIterable {
         case .home: return "house.fill"
         case .meals: return "fork.knife"
         case .symptoms: return "heart.text.square.fill"
+        case .beverages: return "drop.fill"
         case .analytics: return "chart.line.uptrend.xyaxis"
         case .settings: return "gear"
         }
@@ -119,6 +130,7 @@ enum Tab: String, CaseIterable {
             Symptom.self,
             Correlation.self,
             UserProfile.self,
-            MealReminderTime.self
+            MealReminderTime.self,
+            FluidEntry.self
         ], inMemory: true)
 }

@@ -13,15 +13,44 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Meal.timestamp, order: .reverse) private var recentMeals: [Meal]
     @Query(sort: \Symptom.timestamp, order: .reverse) private var recentSymptoms: [Symptom]
+    @Query(sort: \FluidEntry.timestamp, order: .reverse) private var beverageEntries: [FluidEntry]
     @Query private var userProfiles: [UserProfile]
     
     @State private var showingMealLogger = false
     @State private var showingSymptomTracker = false
+    @State private var showingBeverageLogger = false
     @State private var selectedMeal: Meal?
     @State private var selectedSymptom: Symptom?
+    @State private var selectedBeverage: FluidEntry?
     
     private var userProfile: UserProfile? {
         userProfiles.first
+    }
+    
+    /// Calculate today's caffeine intake
+    private var todaysCaffeineAmount: Int {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
+        
+        let todaysEntries = beverageEntries.filter { entry in
+            entry.timestamp >= today && entry.timestamp < tomorrow
+        }
+        
+        return Int(todaysEntries.reduce(0) { $0 + ($1.caffeineContent ?? 0) })
+    }
+    
+    /// Calculate today's fluid intake
+    private var todaysFluidAmount: Double {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
+        
+        let todaysEntries = beverageEntries.filter { entry in
+            entry.timestamp >= today && entry.timestamp < tomorrow
+        }
+        
+        return todaysEntries.reduce(0) { $0 + $1.effectiveHydration }
     }
     
     /// Calculate current streak from actual data
@@ -93,6 +122,12 @@ struct HomeView: View {
             .sheet(item: $selectedSymptom) { symptom in
                 SymptomDetailView(symptom: symptom)
             }
+            .sheet(isPresented: $showingBeverageLogger) {
+                BeverageLoggingSheet()
+            }
+            .sheet(item: $selectedBeverage) { beverage in
+                BeverageDetailView(entry: beverage)
+            }
         }
     }
     
@@ -120,20 +155,38 @@ struct HomeView: View {
     
     /// Stats overview section
     private var statsSection: some View {
-        HStack(spacing: DesignSystem.Spacing.small) {
-            StatCard(
-                title: "Meals Logged",
-                value: "\(recentMeals.count)",
-                icon: "fork.knife",
-                gradient: DesignSystem.Gradients.primary
-            )
+        VStack(spacing: DesignSystem.Spacing.small) {
+            HStack(spacing: DesignSystem.Spacing.small) {
+                StatCard(
+                    title: "Meals Logged",
+                    value: "\(recentMeals.count)",
+                    icon: "fork.knife",
+                    gradient: DesignSystem.Gradients.primary
+                )
+                
+                StatCard(
+                    title: "Symptoms Tracked",
+                    value: "\(recentSymptoms.count)",
+                    icon: "heart.text.square.fill",
+                    gradient: DesignSystem.Gradients.secondary
+                )
+            }
             
-            StatCard(
-                title: "Symptoms Tracked",
-                value: "\(recentSymptoms.count)",
-                icon: "heart.text.square.fill",
-                gradient: DesignSystem.Gradients.secondary
-            )
+            HStack(spacing: DesignSystem.Spacing.small) {
+                StatCard(
+                    title: "Caffeine Today",
+                    value: "\(todaysCaffeineAmount)mg",
+                    icon: "cup.and.saucer.fill",
+                    gradient: DesignSystem.Gradients.accent
+                )
+                
+                StatCard(
+                    title: "Hydration Today",
+                    value: formatFluidAmount(todaysFluidAmount),
+                    icon: "drop.fill",
+                    gradient: DesignSystem.Gradients.accent
+                )
+            }
         }
     }
     
@@ -143,10 +196,10 @@ struct HomeView: View {
             Text("Recent Activity")
                 .font(.headline)
             
-            if recentMeals.isEmpty && recentSymptoms.isEmpty {
+            if recentMeals.isEmpty && recentSymptoms.isEmpty && beverageEntries.isEmpty {
                 EmptyStateCard(
                     title: "No Activity Yet",
-                    message: "Start by logging your first meal or symptom",
+                    message: "Start by logging your first meal, symptom, or beverage",
                     icon: "chart.bar.doc.horizontal"
                 )
             } else {
@@ -158,9 +211,24 @@ struct HomeView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             
-                            ForEach(recentMeals.prefix(3)) { meal in
+                            ForEach(recentMeals.prefix(2)) { meal in
                                 RecentMealCard(meal: meal) {
                                     selectedMeal = meal
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Recent Beverages
+                    if !beverageEntries.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label("Recent Beverages", systemImage: "clock")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            ForEach(beverageEntries.prefix(2)) { beverage in
+                                RecentBeverageCard(beverage: beverage) {
+                                    selectedBeverage = beverage
                                 }
                             }
                         }
@@ -173,7 +241,7 @@ struct HomeView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             
-                            ForEach(recentSymptoms.prefix(3)) { symptom in
+                            ForEach(recentSymptoms.prefix(2)) { symptom in
                                 RecentSymptomCard(symptom: symptom) {
                                     selectedSymptom = symptom
                                 }
@@ -191,24 +259,39 @@ struct HomeView: View {
             Text("Quick Actions")
                 .font(.headline)
             
-            HStack(spacing: 16) {
-                QuickActionButton(
-                    title: "Log Meal",
-                    icon: "plus.circle.fill",
-                    color: .orange,
-                    action: {
-                        showingMealLogger = true
-                    }
-                )
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    QuickActionButton(
+                        title: "Log Meal",
+                        icon: "plus.circle.fill",
+                        color: .orange,
+                        action: {
+                            showingMealLogger = true
+                        }
+                    )
+                    
+                    QuickActionButton(
+                        title: "Track Symptom",
+                        icon: "heart.text.square.fill",
+                        color: .pink,
+                        action: {
+                            showingSymptomTracker = true
+                        }
+                    )
+                }
                 
-                QuickActionButton(
-                    title: "Track Symptom",
-                    icon: "heart.text.square.fill",
-                    color: .pink,
-                    action: {
-                        showingSymptomTracker = true
-                    }
-                )
+                HStack(spacing: 12) {
+                    QuickActionButton(
+                        title: "Log Beverage",
+                        icon: "drop.fill",
+                        color: .blue,
+                        action: {
+                            showingBeverageLogger = true
+                        }
+                    )
+                    
+                    Spacer()
+                }
             }
         }
     }
@@ -235,6 +318,14 @@ struct HomeView: View {
             let profile = UserProfile()
             modelContext.insert(profile)
         }
+    }
+    
+    /// Format fluid amount for display
+    private func formatFluidAmount(_ amount: Double) -> String {
+        if amount >= 1000 {
+            return String(format: "%.1fL", amount / 1000)
+        }
+        return String(format: "%.0fml", amount)
     }
 }
 
@@ -300,6 +391,61 @@ struct RecentMealCard: View {
                 Spacer()
                 
                 Text(meal.timestamp, style: .time)
+                    .font(.caption)
+                    .foregroundColor(DesignSystem.Colors.secondaryText)
+            }
+            .padding(DesignSystem.Spacing.small)
+            .background(DesignSystem.Colors.cardBackground)
+            .cornerRadius(DesignSystem.CornerRadius.medium)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+/// Recent beverage card
+struct RecentBeverageCard: View {
+    let beverage: FluidEntry
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                Image(systemName: beverage.type.icon)
+                    .font(.title2)
+                    .foregroundStyle(beverage.type.isCaffeinated ? 
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.brown, Color.brown.opacity(0.8)]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ) : DesignSystem.Gradients.accent
+                    )
+                    .frame(width: 44, height: 44)
+                    .background(DesignSystem.Colors.cardBackground)
+                    .cornerRadius(DesignSystem.CornerRadius.small)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(beverage.displayName)
+                        .font(.headline)
+                        .foregroundColor(DesignSystem.Colors.primaryText)
+                    
+                    HStack(spacing: 8) {
+                        Text(beverage.formattedAmount)
+                            .font(.caption)
+                        
+                        if let caffeine = beverage.formattedCaffeineContent {
+                            Text("•")
+                            Text(caffeine)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.brown)
+                        }
+                    }
+                    .foregroundColor(DesignSystem.Colors.secondaryText)
+                }
+                
+                Spacer()
+                
+                Text(beverage.timestamp, style: .time)
                     .font(.caption)
                     .foregroundColor(DesignSystem.Colors.secondaryText)
             }
@@ -390,13 +536,32 @@ struct QuickActionButton: View {
             .frame(maxWidth: .infinity)
             .padding(DesignSystem.Spacing.medium)
             .background(
-                color == .orange ? DesignSystem.Gradients.primary : DesignSystem.Gradients.secondary
+                gradientForColor(color)
             )
             .cornerRadius(DesignSystem.CornerRadius.medium)
             .shadow(color: color.opacity(0.3), radius: 12, x: 0, y: 6)
         }
         .buttonStyle(PlainButtonStyle())
         .scaleEffect(1.0)
+    }
+    
+    private func gradientForColor(_ color: Color) -> LinearGradient {
+        switch color {
+        case .orange:
+            return DesignSystem.Gradients.primary
+        case .pink:
+            return DesignSystem.Gradients.secondary
+        case .blue:
+            return DesignSystem.Gradients.accent
+        case .brown:
+            return LinearGradient(
+                gradient: Gradient(colors: [Color.brown, Color.brown.opacity(0.8)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        default:
+            return DesignSystem.Gradients.primary
+        }
     }
 }
 
@@ -438,6 +603,7 @@ struct EmptyStateCard: View {
             Symptom.self,
             Correlation.self,
             UserProfile.self,
-            MealReminderTime.self
+            MealReminderTime.self,
+            FluidEntry.self
         ], inMemory: true)
 }

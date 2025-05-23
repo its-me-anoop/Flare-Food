@@ -19,7 +19,8 @@ struct Flare_FoodApp: App {
             Symptom.self,
             Correlation.self,
             UserProfile.self,
-            MealReminderTime.self
+            MealReminderTime.self,
+            FluidEntry.self
         ])
         
         let modelConfiguration = ModelConfiguration(
@@ -54,12 +55,8 @@ struct Flare_FoodApp: App {
     /// Seeds the database with initial data if needed
     @MainActor
     private func seedDatabaseIfNeeded() async {
-        do {
-            let context = sharedModelContainer.mainContext
-            let dataService = DataService(modelContext: context)
-            await FoodDatabaseSeeder.seedIfNeeded(using: dataService)
-        } catch {
-            print("Failed to seed database: \(error)")
-        }
+        let context = sharedModelContainer.mainContext
+        let dataService = DataService(modelContext: context)
+        await FoodDatabaseSeeder.seedIfNeeded(using: dataService)
     }
 }
