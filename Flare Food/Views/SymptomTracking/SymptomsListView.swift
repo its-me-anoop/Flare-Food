@@ -16,6 +16,7 @@ struct SymptomsListView: View {
     @State private var searchText = ""
     @State private var selectedCategory: Symptom.SymptomCategory?
     @State private var showingSymptomTracker = false
+    @State private var selectedSymptom: Symptom?
     @State private var symptomToEdit: Symptom?
     @State private var showingDeleteAlert = false
     @State private var symptomToDelete: Symptom?
@@ -102,23 +103,25 @@ struct SymptomsListView: View {
                                 ForEach(groupedSymptoms, id: \.key) { dateGroup in
                                     Section {
                                         ForEach(dateGroup.value) { symptom in
-                                            SymptomRowView(symptom: symptom)
-                                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-                                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                                    Button(role: .destructive) {
-                                                        symptomToDelete = symptom
-                                                        showingDeleteAlert = true
-                                                    } label: {
-                                                        Label("Delete", systemImage: "trash")
-                                                    }
-                                                    
-                                                    Button {
-                                                        symptomToEdit = symptom
-                                                    } label: {
-                                                        Label("Edit", systemImage: "pencil")
-                                                    }
-                                                    .tint(.purple)
+                                            SymptomRowView(symptom: symptom) {
+                                                selectedSymptom = symptom
+                                            }
+                                            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                                Button(role: .destructive) {
+                                                    symptomToDelete = symptom
+                                                    showingDeleteAlert = true
+                                                } label: {
+                                                    Label("Delete", systemImage: "trash")
                                                 }
+                                                
+                                                Button {
+                                                    symptomToEdit = symptom
+                                                } label: {
+                                                    Label("Edit", systemImage: "pencil")
+                                                }
+                                                .tint(.purple)
+                                            }
                                         }
                                     } header: {
                                         Text(dateGroup.key)
@@ -160,6 +163,9 @@ struct SymptomsListView: View {
             .searchable(text: $searchText, prompt: "Search symptoms")
             .sheet(isPresented: $showingSymptomTracker) {
                 SymptomTrackingSheet()
+            }
+            .sheet(item: $selectedSymptom) { symptom in
+                SymptomDetailView(symptom: symptom)
             }
             .sheet(item: $symptomToEdit) { symptom in
                 SymptomEditSheet(symptom: symptom)
@@ -265,9 +271,11 @@ struct SymptomsListView: View {
 /// Individual symptom row
 struct SymptomRowView: View {
     let symptom: Symptom
+    let onTap: () -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignSystem.Spacing.small) {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.small) {
             // Header
             HStack {
                 // Symptom icon
@@ -330,9 +338,11 @@ struct SymptomRowView: View {
                     .padding(.leading, 44 + DesignSystem.Spacing.small)
             }
             
+            }
+            .padding()
+            .glassBackground()
         }
-        .padding()
-        .glassBackground()
+        .buttonStyle(PlainButtonStyle())
     }
     
     private var severityGradient: LinearGradient {
