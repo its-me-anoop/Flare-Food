@@ -39,6 +39,7 @@ protocol DataServiceProtocol {
     // User profile operations
     func fetchUserProfile() throws -> UserProfile
     func saveUserProfile(_ profile: UserProfile) throws
+    func getActiveProfileId() throws -> UUID?
 }
 
 /// Main data service for managing app data
@@ -269,7 +270,7 @@ final class DataService: DataServiceProtocol {
             return profile
         } else {
             // Create default profile if none exists
-            let newProfile = UserProfile()
+            let newProfile = UserProfile(isActive: true)
             modelContext.insert(newProfile)
             try modelContext.save()
             return newProfile
@@ -280,5 +281,17 @@ final class DataService: DataServiceProtocol {
     /// - Parameter profile: The profile to save
     func saveUserProfile(_ profile: UserProfile) throws {
         try modelContext.save()
+    }
+    
+    /// Gets the active profile ID
+    /// - Returns: The UUID of the active profile, or nil if no active profile exists
+    func getActiveProfileId() throws -> UUID? {
+        let descriptor = FetchDescriptor<UserProfile>(
+            predicate: #Predicate { profile in
+                profile.isActive == true
+            }
+        )
+        let profiles = try modelContext.fetch(descriptor)
+        return profiles.first?.id
     }
 }

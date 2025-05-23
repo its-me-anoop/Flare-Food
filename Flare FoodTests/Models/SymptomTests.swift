@@ -15,13 +15,15 @@ struct SymptomTests {
     @Test("Symptom initialization with default values")
     func testSymptomInitializationDefaults() async throws {
         // Given
+        let profileId = UUID()
         let type = Symptom.SymptomType.headache
         let severity = 7.5
         
         // When
-        let symptom = Symptom(type: type, severity: severity)
+        let symptom = Symptom(profileId: profileId, type: type, severity: severity)
         
         // Then
+        #expect(symptom.profileId == profileId)
         #expect(symptom.symptomType == type.rawValue)
         #expect(symptom.severity == severity)
         #expect(symptom.notes == nil)
@@ -34,6 +36,7 @@ struct SymptomTests {
     @Test("Symptom initialization with all parameters")
     func testSymptomInitializationWithAllParameters() async throws {
         // Given
+        let profileId = UUID()
         let type = Symptom.SymptomType.stomachPain
         let severity = 6.0
         let notes = "After eating dairy"
@@ -43,6 +46,7 @@ struct SymptomTests {
         
         // When
         let symptom = Symptom(
+            profileId: profileId,
             type: type,
             severity: severity,
             notes: notes,
@@ -52,6 +56,7 @@ struct SymptomTests {
         )
         
         // Then
+        #expect(symptom.profileId == profileId)
         #expect(symptom.symptomType == type.rawValue)
         #expect(symptom.severity == severity)
         #expect(symptom.notes == notes)
@@ -62,16 +67,18 @@ struct SymptomTests {
     
     @Test("Symptom severity bounds")
     func testSymptomSeverityBounds() async throws {
+        let profileId = UUID()
+        
         // Test upper bound
-        let symptom1 = Symptom(type: .headache, severity: 15.0)
+        let symptom1 = Symptom(profileId: profileId, type: .headache, severity: 15.0)
         #expect(symptom1.severity == 10.0)
         
         // Test lower bound
-        let symptom2 = Symptom(type: .headache, severity: -5.0)
+        let symptom2 = Symptom(profileId: profileId, type: .headache, severity: -5.0)
         #expect(symptom2.severity == 0.0)
         
         // Test valid range
-        let symptom3 = Symptom(type: .headache, severity: 5.5)
+        let symptom3 = Symptom(profileId: profileId, type: .headache, severity: 5.5)
         #expect(symptom3.severity == 5.5)
     }
     

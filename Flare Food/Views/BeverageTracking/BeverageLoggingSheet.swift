@@ -12,6 +12,7 @@ import SwiftData
 struct BeverageLoggingSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(filter: #Predicate<UserProfile> { $0.isActive }) private var activeProfiles: [UserProfile]
     
     @State private var selectedType: FluidEntry.FluidType = .water
     @State private var customTypeName = ""
@@ -23,7 +24,16 @@ struct BeverageLoggingSheet: View {
     @State private var selectedDate = Date()
     @State private var linkedMeal: Meal?
     
-    @Query(sort: \Meal.timestamp, order: .reverse) private var recentMeals: [Meal]
+    @Query(sort: \Meal.timestamp, order: .reverse) private var allMeals: [Meal]
+    
+    private var activeProfile: UserProfile? {
+        activeProfiles.first
+    }
+    
+    private var recentMeals: [Meal] {
+        guard let profileId = activeProfile?.id else { return [] }
+        return allMeals.filter { $0.profileId == profileId }
+    }
     
     private var currentMeal: Meal? {
         let fiveMinutesAgo = Date().addingTimeInterval(-5 * 60)
@@ -315,20 +325,25 @@ struct BeverageLoggingSheet: View {
     }
     
     private func saveBeverageEntry() {
-        let entry = FluidEntry(
-            timestamp: selectedDate,
-            type: selectedType,
-            amount: amount,
-            temperature: temperature,
-            caffeineContent: selectedType.isCaffeinated ? caffeineContent : nil,
-            notes: notes.isEmpty ? nil : notes,
-            customTypeName: selectedType == .other ? customTypeName : nil,
-            meal: linkedMeal
-        )
-        
-        modelContext.insert(entry)
-        
         do {
+            guard let profile = activeProfile else {
+                print("No active profile found")
+                return
+            }
+            
+            let entry = FluidEntry(
+                profileId: profile.id,
+                timestamp: selectedDate,
+                type: selectedType,
+                amount: amount,
+                temperature: temperature,
+                caffeineContent: selectedType.isCaffeinated ? caffeineContent : nil,
+                notes: notes.isEmpty ? nil : notes,
+                customTypeName: selectedType == .other ? customTypeName : nil,
+                meal: linkedMeal
+            )
+            
+            modelContext.insert(entry)
             try modelContext.save()
             dismiss()
         } catch {

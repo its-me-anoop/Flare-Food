@@ -11,10 +11,10 @@ import SwiftData
 /// Home dashboard view
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Meal.timestamp, order: .reverse) private var recentMeals: [Meal]
-    @Query(sort: \Symptom.timestamp, order: .reverse) private var recentSymptoms: [Symptom]
-    @Query(sort: \FluidEntry.timestamp, order: .reverse) private var beverageEntries: [FluidEntry]
-    @Query private var userProfiles: [UserProfile]
+    @Query(filter: #Predicate<UserProfile> { $0.isActive }) private var activeProfiles: [UserProfile]
+    @Query(sort: \Meal.timestamp, order: .reverse) private var allMeals: [Meal]
+    @Query(sort: \Symptom.timestamp, order: .reverse) private var allSymptoms: [Symptom]
+    @Query(sort: \FluidEntry.timestamp, order: .reverse) private var allBeverageEntries: [FluidEntry]
     
     @State private var showingMealLogger = false
     @State private var showingSymptomTracker = false
@@ -22,9 +22,36 @@ struct HomeView: View {
     @State private var selectedMeal: Meal?
     @State private var selectedSymptom: Symptom?
     @State private var selectedBeverage: FluidEntry?
+    @State private var selectedArticle: Article?
     
-    private var userProfile: UserProfile? {
-        userProfiles.first
+    private var activeProfile: UserProfile? {
+        activeProfiles.first
+    }
+    
+    /// Filtered meals for active profile
+    private var recentMeals: [Meal] {
+        guard let profileId = activeProfile?.id else { return [] }
+        return allMeals.filter { $0.profileId == profileId }
+    }
+    
+    /// Filtered symptoms for active profile
+    private var recentSymptoms: [Symptom] {
+        guard let profileId = activeProfile?.id else { return [] }
+        return allSymptoms.filter { $0.profileId == profileId }
+    }
+    
+    /// Filtered beverages for active profile
+    private var beverageEntries: [FluidEntry] {
+        guard let profileId = activeProfile?.id else { return [] }
+        return allBeverageEntries.filter { $0.profileId == profileId }
+    }
+    
+    /// Random article for today (consistent throughout the day)
+    private var todayArticle: Article {
+        let today = Calendar.current.startOfDay(for: Date())
+        let daysSinceReferenceDate = Calendar.current.dateComponents([.day], from: Date.distantPast, to: today).day ?? 0
+        let index = daysSinceReferenceDate % Article.sampleArticles.count
+        return Article.sampleArticles[index]
     }
     
     /// Calculate today's caffeine intake
@@ -97,6 +124,9 @@ struct HomeView: View {
                         // Stats Section
                         statsSection
                         
+                        // Daily Article Section
+                        dailyArticleSection
+                        
                         // Recent Activity
                         recentActivitySection
                         
@@ -107,6 +137,11 @@ struct HomeView: View {
                 }
             .navigationTitle("Home")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    ProfileNavigationButton()
+                }
+            }
             .onAppear {
                 ensureUserProfile()
             }
@@ -127,6 +162,9 @@ struct HomeView: View {
             }
             .sheet(item: $selectedBeverage) { beverage in
                 BeverageDetailView(entry: beverage)
+            }
+            .sheet(item: $selectedArticle) { article in
+                ArticleDetailView(article: article)
             }
         }
     }
@@ -186,6 +224,18 @@ struct HomeView: View {
                     icon: "drop.fill",
                     gradient: DesignSystem.Gradients.accent
                 )
+            }
+        }
+    }
+    
+    /// Daily article section
+    private var dailyArticleSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Today's Article")
+                .font(.headline)
+            
+            ArticleCard(article: todayArticle) {
+                selectedArticle = todayArticle
             }
         }
     }
@@ -314,8 +364,9 @@ struct HomeView: View {
     
     /// Ensures a user profile exists
     private func ensureUserProfile() {
-        if userProfiles.isEmpty {
+        if activeProfiles.isEmpty {
             let profile = UserProfile()
+            profile.isActive = true
             modelContext.insert(profile)
         }
     }

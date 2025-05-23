@@ -15,6 +15,9 @@ final class Symptom {
     /// Unique identifier for the symptom entry
     var id: UUID
     
+    /// Profile ID this symptom belongs to
+    var profileId: UUID
+    
     /// Timestamp when the symptom occurred
     var timestamp: Date
     
@@ -38,6 +41,7 @@ final class Symptom {
     
     /// Initializes a new Symptom entry
     /// - Parameters:
+    ///   - profileId: The profile ID this symptom belongs to
     ///   - type: The type of symptom
     ///   - timestamp: When the symptom occurred
     ///   - severity: Severity on a scale of 0-10
@@ -46,6 +50,7 @@ final class Symptom {
     ///   - durationMinutes: Optional duration in minutes
     ///   - bodyLocation: Optional body location
     init(
+        profileId: UUID,
         type: SymptomType,
         timestamp: Date = Date(),
         severity: Double,
@@ -55,6 +60,7 @@ final class Symptom {
         bodyLocation: String? = nil
     ) {
         self.id = UUID()
+        self.profileId = profileId
         self.timestamp = timestamp
         self.symptomType = type.rawValue
         self.severity = max(0.0, min(10.0, severity))

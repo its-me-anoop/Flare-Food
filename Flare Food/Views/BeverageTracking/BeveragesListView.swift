@@ -11,12 +11,23 @@ import SwiftData
 /// List view for viewing beverage intake history
 struct BeveragesListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \FluidEntry.timestamp, order: .reverse) private var beverageEntries: [FluidEntry]
+    @Query(filter: #Predicate<UserProfile> { $0.isActive }) private var activeProfiles: [UserProfile]
+    @Query(sort: \FluidEntry.timestamp, order: .reverse) private var allBeverageEntries: [FluidEntry]
     
     @State private var showingAddSheet = false
     @State private var selectedEntry: FluidEntry?
     @State private var selectedTimeRange: TimeRange = .today
     @State private var showCaffeinatedOnly = false
+    
+    private var activeProfile: UserProfile? {
+        activeProfiles.first
+    }
+    
+    /// Beverages filtered by active profile
+    private var beverageEntries: [FluidEntry] {
+        guard let profileId = activeProfile?.id else { return [] }
+        return allBeverageEntries.filter { $0.profileId == profileId }
+    }
     
     enum TimeRange: String, CaseIterable {
         case today = "Today"
@@ -121,6 +132,11 @@ struct BeveragesListView: View {
                 }
             }
             .navigationTitle("Beverages")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    ProfileNavigationButton()
+                }
+            }
             .sheet(isPresented: $showingAddSheet) {
                 BeverageLoggingSheet()
             }

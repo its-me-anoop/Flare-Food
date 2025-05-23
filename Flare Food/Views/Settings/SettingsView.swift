@@ -11,28 +11,79 @@ import SwiftData
 /// Settings view for app configuration
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var userProfiles: [UserProfile]
+    @Query(filter: #Predicate<UserProfile> { $0.isActive }) private var activeProfiles: [UserProfile]
+    @State private var showingProfileManagement = false
     
-    private var userProfile: UserProfile? {
-        userProfiles.first
+    private var activeProfile: UserProfile? {
+        activeProfiles.first
     }
     
     var body: some View {
         NavigationStack {
             Form {
+                // Profile Management Section
+                Section("Profiles") {
+                    NavigationLink {
+                        ProfileManagementView()
+                    } label: {
+                        HStack {
+                            if let profile = activeProfile {
+                                ZStack {
+                                    Circle()
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [
+                                                    UserProfile.ProfileColor(rawValue: profile.profileColor)?.color ?? DesignSystem.Colors.primaryGradientStart,
+                                                    (UserProfile.ProfileColor(rawValue: profile.profileColor)?.color ?? DesignSystem.Colors.primaryGradientStart).opacity(0.8)
+                                                ],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                        .frame(width: 40, height: 40)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(.white.opacity(0.2), lineWidth: 1)
+                                        )
+                                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                                    
+                                    Text(profile.initials)
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                        .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 0.5)
+                                }
+                                
+                                VStack(alignment: .leading) {
+                                    Text(profile.name ?? "Unnamed Profile")
+                                        .font(.headline)
+                                    Text("Active Profile")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            
+                            Spacer()
+                            
+                            Text("Manage")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
                 // Profile Section
-                Section("Profile") {
+                Section("Current Profile") {
                     HStack {
                         Label("Name", systemImage: "person.fill")
                         Spacer()
-                        Text(userProfile?.name ?? "Not set")
+                        Text(activeProfile?.name ?? "Not set")
                             .foregroundColor(.secondary)
                     }
                     
                     HStack {
                         Label("Member Since", systemImage: "calendar")
                         Spacer()
-                        if let joinDate = userProfile?.joinDate {
+                        if let joinDate = activeProfile?.joinDate {
                             Text(joinDate, style: .date)
                                 .foregroundColor(.secondary)
                         }
@@ -41,7 +92,7 @@ struct SettingsView: View {
                 
                 // Conditions Section
                 Section("Health Conditions") {
-                    if let conditions = userProfile?.conditions, !conditions.isEmpty {
+                    if let conditions = activeProfile?.conditions, !conditions.isEmpty {
                         ForEach(conditions, id: \.self) { condition in
                             Text(condition)
                         }
@@ -57,9 +108,9 @@ struct SettingsView: View {
                 
                 // Notifications Section
                 Section("Notifications") {
-                    Toggle("Enable Notifications", isOn: .constant(userProfile?.notificationsEnabled ?? true))
+                    Toggle("Enable Notifications", isOn: .constant(activeProfile?.notificationsEnabled ?? true))
                     
-                    if userProfile?.notificationsEnabled ?? true {
+                    if activeProfile?.notificationsEnabled ?? true {
                         Button("Meal Reminder Times") {
                             // TODO: Show meal reminder configuration
                         }
@@ -68,9 +119,9 @@ struct SettingsView: View {
                 
                 // Data & Privacy Section
                 Section("Data & Privacy") {
-                    Toggle("iCloud Sync", isOn: .constant(userProfile?.iCloudSyncEnabled ?? true))
-                    Toggle("HealthKit Integration", isOn: .constant(userProfile?.healthKitEnabled ?? false))
-                    Toggle("Face ID / Touch ID", isOn: .constant(userProfile?.biometricAuthEnabled ?? false))
+                    Toggle("iCloud Sync", isOn: .constant(activeProfile?.iCloudSyncEnabled ?? true))
+                    Toggle("HealthKit Integration", isOn: .constant(activeProfile?.healthKitEnabled ?? false))
+                    Toggle("Face ID / Touch ID", isOn: .constant(activeProfile?.biometricAuthEnabled ?? false))
                 }
                 
                 // Statistics Section
@@ -79,7 +130,7 @@ struct SettingsView: View {
                         Label("Current Streak", systemImage: "flame.fill")
                             .foregroundColor(.orange)
                         Spacer()
-                        Text("\(userProfile?.currentStreak ?? 0) days")
+                        Text("\(activeProfile?.currentStreak ?? 0) days")
                             .foregroundColor(.secondary)
                     }
                     
@@ -87,21 +138,21 @@ struct SettingsView: View {
                         Label("Longest Streak", systemImage: "trophy.fill")
                             .foregroundColor(.yellow)
                         Spacer()
-                        Text("\(userProfile?.longestStreak ?? 0) days")
+                        Text("\(activeProfile?.longestStreak ?? 0) days")
                             .foregroundColor(.secondary)
                     }
                     
                     HStack {
                         Label("Total Meals", systemImage: "fork.knife")
                         Spacer()
-                        Text("\(userProfile?.totalMealsLogged ?? 0)")
+                        Text("\(activeProfile?.totalMealsLogged ?? 0)")
                             .foregroundColor(.secondary)
                     }
                     
                     HStack {
                         Label("Total Symptoms", systemImage: "heart.text.square")
                         Spacer()
-                        Text("\(userProfile?.totalSymptomsLogged ?? 0)")
+                        Text("\(activeProfile?.totalSymptomsLogged ?? 0)")
                             .foregroundColor(.secondary)
                     }
                 }
@@ -148,8 +199,9 @@ struct SettingsView: View {
     
     /// Ensures a user profile exists
     private func ensureUserProfile() {
-        if userProfiles.isEmpty {
+        if activeProfiles.isEmpty {
             let profile = UserProfile()
+            profile.isActive = true
             modelContext.insert(profile)
         }
     }

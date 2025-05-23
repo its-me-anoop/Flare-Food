@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 import SwiftData
 
 /// Represents the user's profile and app settings
@@ -16,6 +17,12 @@ final class UserProfile {
     
     /// User's name (optional)
     var name: String?
+    
+    /// Profile color for visual distinction
+    var profileColor: String
+    
+    /// Whether this is the currently active profile
+    var isActive: Bool
     
     /// Date when the user started using the app
     var joinDate: Date
@@ -56,9 +63,22 @@ final class UserProfile {
     /// Preferred app theme
     var preferredTheme: String
     
+    /// Profile initials for avatar
+    var initials: String {
+        guard let name = name, !name.isEmpty else { return "?" }
+        let words = name.split(separator: " ").map(String.init)
+        if words.count >= 2 {
+            return "\(words[0].first ?? "?")\(words[1].first ?? "?")"
+        }
+        return String(name.prefix(2))
+    }
+    
     /// Initializes a new UserProfile
-    init() {
+    init(name: String? = nil, profileColor: String = ProfileColor.blue.rawValue, isActive: Bool = false) {
         self.id = UUID()
+        self.name = name
+        self.profileColor = profileColor
+        self.isActive = isActive
         self.joinDate = Date()
         self.conditions = []
         self.notificationsEnabled = true
@@ -126,6 +146,31 @@ extension UserProfile {
         case light = "Light"
         case dark = "Dark"
         case system = "System"
+    }
+    
+    /// Profile color options
+    enum ProfileColor: String, CaseIterable {
+        case blue = "Blue"
+        case purple = "Purple"
+        case pink = "Pink"
+        case orange = "Orange"
+        case green = "Green"
+        case red = "Red"
+        case yellow = "Yellow"
+        case teal = "Teal"
+        
+        var color: Color {
+            switch self {
+            case .blue: return .blue
+            case .purple: return .purple
+            case .pink: return .pink
+            case .orange: return .orange
+            case .green: return .green
+            case .red: return .red
+            case .yellow: return .yellow
+            case .teal: return .teal
+            }
+        }
     }
     
     /// Common conditions tracked by the app

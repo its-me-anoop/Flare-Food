@@ -12,6 +12,7 @@ import SwiftData
 @Model
 final class FluidEntry {
     var id: UUID
+    var profileId: UUID
     var timestamp: Date
     var type: FluidType
     var amount: Double // in ml
@@ -190,6 +191,7 @@ final class FluidEntry {
     }
     
     init(
+        profileId: UUID,
         timestamp: Date = Date(),
         type: FluidType,
         amount: Double,
@@ -200,6 +202,7 @@ final class FluidEntry {
         meal: Meal? = nil
     ) {
         self.id = UUID()
+        self.profileId = profileId
         self.timestamp = timestamp
         self.type = type
         self.amount = amount

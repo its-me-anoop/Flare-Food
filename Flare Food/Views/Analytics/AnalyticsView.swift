@@ -12,15 +12,32 @@ import Charts
 /// Enhanced analytics view with interactive visualizations
 struct AnalyticsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Query(filter: #Predicate<UserProfile> { $0.isActive }) private var activeProfiles: [UserProfile]
     @Query(sort: \Correlation.correlationCoefficient, order: .reverse) private var correlations: [Correlation]
-    @Query private var meals: [Meal]
-    @Query private var symptoms: [Symptom]
+    @Query private var allMeals: [Meal]
+    @Query private var allSymptoms: [Symptom]
     
     @State private var selectedTimeRange = TimeRange.month
     @State private var showingSignificantOnly = true
     @State private var selectedChartType = ChartType.trends
     @State private var selectedSymptomCategory: Symptom.SymptomCategory?
     @State private var showingDetails = false
+    
+    private var activeProfile: UserProfile? {
+        activeProfiles.first
+    }
+    
+    /// Meals filtered by active profile
+    private var meals: [Meal] {
+        guard let profileId = activeProfile?.id else { return [] }
+        return allMeals.filter { $0.profileId == profileId }
+    }
+    
+    /// Symptoms filtered by active profile
+    private var symptoms: [Symptom] {
+        guard let profileId = activeProfile?.id else { return [] }
+        return allSymptoms.filter { $0.profileId == profileId }
+    }
     
     var body: some View {
         NavigationStack {
@@ -50,6 +67,9 @@ struct AnalyticsView: View {
             .navigationTitle("Analytics")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    ProfileNavigationButton()
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingDetails.toggle() }) {
                         Image(systemName: "info.circle")

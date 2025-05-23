@@ -11,7 +11,8 @@ import SwiftData
 /// View displaying a list of all tracked symptoms
 struct SymptomsListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Symptom.timestamp, order: .reverse) private var symptoms: [Symptom]
+    @Query(filter: #Predicate<UserProfile> { $0.isActive }) private var activeProfiles: [UserProfile]
+    @Query(sort: \Symptom.timestamp, order: .reverse) private var allSymptoms: [Symptom]
     
     @State private var searchText = ""
     @State private var selectedCategory: Symptom.SymptomCategory?
@@ -20,6 +21,16 @@ struct SymptomsListView: View {
     @State private var symptomToEdit: Symptom?
     @State private var showingDeleteAlert = false
     @State private var symptomToDelete: Symptom?
+    
+    private var activeProfile: UserProfile? {
+        activeProfiles.first
+    }
+    
+    /// Symptoms filtered by active profile
+    private var symptoms: [Symptom] {
+        guard let profileId = activeProfile?.id else { return [] }
+        return allSymptoms.filter { $0.profileId == profileId }
+    }
     
     /// Filtered symptoms based on search and category
     private var filteredSymptoms: [Symptom] {
@@ -141,6 +152,11 @@ struct SymptomsListView: View {
             }
             .navigationTitle("Symptoms")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    ProfileNavigationButton()
+                }
+            }
             .searchable(text: $searchText, prompt: "Search symptoms")
             .sheet(isPresented: $showingSymptomTracker) {
                 SymptomTrackingSheet()

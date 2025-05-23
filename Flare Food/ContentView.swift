@@ -45,12 +45,6 @@ struct ContentView: View {
                         Label("Analytics", systemImage: "chart.line.uptrend.xyaxis")
                     }
                     .tag(Tab.analytics)
-                
-                SettingsView()
-                    .tabItem {
-                        Label("Settings", systemImage: "gear")
-                    }
-                    .tag(Tab.settings)
         }
         .tint(DesignSystem.Colors.primaryGradientStart)
         #else
@@ -73,8 +67,6 @@ struct ContentView: View {
                 BeveragesListView()
             case .analytics:
                 AnalyticsView()
-            case .settings:
-                SettingsView()
             }
         }
         #endif
@@ -88,7 +80,6 @@ enum Tab: String, CaseIterable {
     case symptoms
     case beverages
     case analytics
-    case settings
     
     var title: String {
         switch self {
@@ -97,7 +88,6 @@ enum Tab: String, CaseIterable {
         case .symptoms: return "Symptoms"
         case .beverages: return "Beverages"
         case .analytics: return "Analytics"
-        case .settings: return "Settings"
         }
     }
     
@@ -108,7 +98,6 @@ enum Tab: String, CaseIterable {
         case .symptoms: return "heart.text.square.fill"
         case .beverages: return "drop.fill"
         case .analytics: return "chart.line.uptrend.xyaxis"
-        case .settings: return "gear"
         }
     }
 }

@@ -151,8 +151,16 @@ final class MealLoggingViewModel: ObservableObject {
                 )
             }
             
+            // Get active profile ID
+            guard let profileId = try dataService.getActiveProfileId() else {
+                errorMessage = "No active profile found. Please select a profile in settings."
+                isLoading = false
+                return
+            }
+            
             // Create meal
             let meal = Meal(
+                profileId: profileId,
                 mealType: selectedMealType,
                 timestamp: selectedTimestamp,
                 foodItems: foodItems,

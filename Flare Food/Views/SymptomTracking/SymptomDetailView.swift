@@ -13,9 +13,14 @@ struct SymptomDetailView: View {
     let symptom: Symptom
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Query private var meals: [Meal]
+    @Query private var allMeals: [Meal]
     @State private var showingEditSheet = false
     @State private var showingDeleteAlert = false
+    
+    /// Meals for the same profile
+    private var meals: [Meal] {
+        allMeals.filter { $0.profileId == symptom.profileId }
+    }
     
     /// Meals logged around the symptom time
     private var nearbyMeals: [Meal] {
@@ -390,6 +395,7 @@ struct SymptomDetailView: View {
 
 #Preview {
     SymptomDetailView(symptom: Symptom(
+        profileId: UUID(),
         type: .bloating,
         timestamp: Date(),
         severity: 7,

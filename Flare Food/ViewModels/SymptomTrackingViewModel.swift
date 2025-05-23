@@ -125,8 +125,16 @@ final class SymptomTrackingViewModel: ObservableObject {
                 duration = Int(durationMinutes)
             }
             
+            // Get active profile ID
+            guard let profileId = try dataService.getActiveProfileId() else {
+                errorMessage = "No active profile found. Please select a profile in settings."
+                isLoading = false
+                return
+            }
+            
             // Create symptom
             let symptom = Symptom(
+                profileId: profileId,
                 type: selectedSymptomType,
                 timestamp: selectedTimestamp,
                 severity: severity,

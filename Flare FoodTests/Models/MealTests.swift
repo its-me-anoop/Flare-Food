@@ -15,12 +15,14 @@ struct MealTests {
     @Test("Meal initialization with default values")
     func testMealInitializationDefaults() async throws {
         // Given
+        let profileId = UUID()
         let mealType = Meal.MealType.breakfast
         
         // When
-        let meal = Meal(mealType: mealType)
+        let meal = Meal(profileId: profileId, mealType: mealType)
         
         // Then
+        #expect(meal.profileId == profileId)
         #expect(meal.mealType == mealType.rawValue)
         #expect(meal.foodItems.isEmpty)
         #expect(meal.photoData == nil)
@@ -32,6 +34,7 @@ struct MealTests {
     @Test("Meal initialization with all parameters")
     func testMealInitializationWithAllParameters() async throws {
         // Given
+        let profileId = UUID()
         let mealType = Meal.MealType.lunch
         let food = Food(name: "Salad", category: "Vegetables")
         let foodItem = FoodItem(food: food, portionSize: 0.75)
@@ -41,6 +44,7 @@ struct MealTests {
         
         // When
         let meal = Meal(
+            profileId: profileId,
             mealType: mealType,
             foodItems: [foodItem],
             photoData: photoData,
@@ -49,6 +53,7 @@ struct MealTests {
         )
         
         // Then
+        #expect(meal.profileId == profileId)
         #expect(meal.mealType == mealType.rawValue)
         #expect(meal.foodItems.count == 1)
         #expect(meal.photoData == photoData)
@@ -73,7 +78,8 @@ struct MealTests {
     @Test("Meal type computed property")
     func testMealTypeComputedProperty() async throws {
         // Given
-        let meal = Meal(mealType: .dinner)
+        let profileId = UUID()
+        let meal = Meal(profileId: profileId, mealType: .dinner)
         
         // When/Then
         #expect(meal.type == .dinner)

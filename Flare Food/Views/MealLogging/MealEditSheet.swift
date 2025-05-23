@@ -221,7 +221,8 @@ struct MealEditSheet: View {
 
 #Preview {
     let container = try! ModelContainer(for: Meal.self, Food.self, FoodItem.self)
-    let meal = Meal(mealType: .lunch)
+    let profileId = UUID()
+    let meal = Meal(profileId: profileId, mealType: .lunch)
     container.mainContext.insert(meal)
     
     return MealEditSheet(meal: meal)

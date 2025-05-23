@@ -15,6 +15,9 @@ final class Meal {
     /// Unique identifier for the meal
     var id: UUID
     
+    /// Profile ID this meal belongs to
+    var profileId: UUID
+    
     /// Timestamp when the meal was consumed
     var timestamp: Date
     
@@ -36,6 +39,7 @@ final class Meal {
     
     /// Initializes a new Meal entry
     /// - Parameters:
+    ///   - profileId: The profile ID this meal belongs to
     ///   - mealType: The type of meal
     ///   - timestamp: When the meal was consumed
     ///   - foodItems: Array of food items with portions
@@ -43,6 +47,7 @@ final class Meal {
     ///   - notes: Optional notes
     ///   - location: Optional location
     init(
+        profileId: UUID,
         mealType: MealType,
         timestamp: Date = Date(),
         foodItems: [FoodItem] = [],
@@ -51,6 +56,7 @@ final class Meal {
         location: String? = nil
     ) {
         self.id = UUID()
+        self.profileId = profileId
         self.timestamp = timestamp
         self.mealType = mealType.rawValue
         self.foodItems = foodItems

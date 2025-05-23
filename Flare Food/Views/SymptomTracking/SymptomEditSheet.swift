@@ -322,10 +322,15 @@ struct SymptomEditSheet: View {
 // MARK: - Preview
 
 #Preview {
-    let container = try! ModelContainer(for: Symptom.self)
-    let symptom = Symptom(type: .headache, severity: 5.0)
-    container.mainContext.insert(symptom)
-    
-    return SymptomEditSheet(symptom: symptom)
-        .modelContainer(container)
+    NavigationStack {
+        Text("Loading Preview...")
+    }
+    .sheet(isPresented: .constant(true)) {
+        let container = try! ModelContainer(for: Symptom.self)
+        let symptom = Symptom(profileId: UUID(), type: .headache, severity: 5.0)
+        container.mainContext.insert(symptom)
+        
+        return SymptomEditSheet(symptom: symptom)
+            .modelContainer(container)
+    }
 }

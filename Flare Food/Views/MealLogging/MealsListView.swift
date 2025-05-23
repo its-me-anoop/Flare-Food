@@ -11,7 +11,8 @@ import SwiftData
 /// View displaying a list of all logged meals
 struct MealsListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Meal.timestamp, order: .reverse) private var meals: [Meal]
+    @Query(filter: #Predicate<UserProfile> { $0.isActive }) private var activeProfiles: [UserProfile]
+    @Query(sort: \Meal.timestamp, order: .reverse) private var allMeals: [Meal]
     
     @State private var showingMealLogger = false
     @State private var selectedMeal: Meal?
@@ -20,6 +21,16 @@ struct MealsListView: View {
     @State private var mealToEdit: Meal?
     @State private var showingDeleteAlert = false
     @State private var mealToDelete: Meal?
+    
+    private var activeProfile: UserProfile? {
+        activeProfiles.first
+    }
+    
+    /// Meals filtered by active profile
+    private var meals: [Meal] {
+        guard let profileId = activeProfile?.id else { return [] }
+        return allMeals.filter { $0.profileId == profileId }
+    }
     
     /// Filtered meals based on search and meal type
     private var filteredMeals: [Meal] {
@@ -72,6 +83,11 @@ struct MealsListView: View {
             }
             .navigationTitle("Meals")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    ProfileNavigationButton()
+                }
+            }
             .searchable(text: $searchText, prompt: "Search foods")
             .sheet(isPresented: $showingMealLogger) {
                 MealLoggingSheet()
