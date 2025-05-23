@@ -41,6 +41,9 @@ private struct MealLoggingSheetContent: View {
                     // Quick meal type selection
                     quickMealTypeSection
                     
+                    // Date and time selection
+                    dateTimeSection
+                    
                     // Recent foods for quick add
                     if !viewModel.recentFoods.isEmpty {
                         recentFoodsSection
@@ -100,6 +103,27 @@ private struct MealLoggingSheetContent: View {
     }
     
     // MARK: - Sections
+    
+    /// Date and time selection
+    private var dateTimeSection: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xSmall) {
+            Text("Date & Time")
+                .font(.caption)
+                .foregroundColor(DesignSystem.Colors.secondaryText)
+                .padding(.horizontal, DesignSystem.Spacing.xxxSmall)
+            
+            DatePicker(
+                "",
+                selection: $viewModel.selectedTimestamp,
+                displayedComponents: [.date, .hourAndMinute]
+            )
+            .datePickerStyle(.compact)
+            .labelsHidden()
+            .padding(.horizontal, DesignSystem.Spacing.small)
+            .padding(.vertical, DesignSystem.Spacing.xSmall)
+            .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
+        }
+    }
     
     /// Quick meal type selection
     private var quickMealTypeSection: some View {

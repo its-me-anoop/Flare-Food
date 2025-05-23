@@ -17,6 +17,9 @@ struct MealsListView: View {
     @State private var selectedMeal: Meal?
     @State private var searchText = ""
     @State private var selectedMealType: Meal.MealType?
+    @State private var mealToEdit: Meal?
+    @State private var showingDeleteAlert = false
+    @State private var mealToDelete: Meal?
     
     /// Filtered meals based on search and meal type
     private var filteredMeals: [Meal] {
@@ -87,6 +90,21 @@ struct MealsListView: View {
             .sheet(item: $selectedMeal) { meal in
                 MealDetailView(meal: meal)
             }
+            .sheet(item: $mealToEdit) { meal in
+                MealEditSheet(meal: meal)
+            }
+            .alert("Delete Meal", isPresented: $showingDeleteAlert) {
+                Button("Cancel", role: .cancel) {
+                    mealToDelete = nil
+                }
+                Button("Delete", role: .destructive) {
+                    if let meal = mealToDelete {
+                        deleteMeal(meal)
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to delete this meal? This action cannot be undone.")
+            }
         }
     }
     
@@ -142,6 +160,21 @@ struct MealsListView: View {
                                 selectedMeal = meal
                             }
                             .padding(.horizontal)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    mealToDelete = meal
+                                    showingDeleteAlert = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                
+                                Button {
+                                    mealToEdit = meal
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                .tint(.orange)
+                            }
                         }
                     }
                     .padding(.vertical, DesignSystem.Spacing.xxSmall)
@@ -190,6 +223,12 @@ struct MealsListView: View {
         } else {
             return date.formatted(date: .abbreviated, time: .omitted)
         }
+    }
+    
+    /// Delete a meal
+    private func deleteMeal(_ meal: Meal) {
+        modelContext.delete(meal)
+        mealToDelete = nil
     }
 }
 

@@ -16,6 +16,9 @@ struct SymptomsListView: View {
     @State private var searchText = ""
     @State private var selectedCategory: Symptom.SymptomCategory?
     @State private var showingSymptomTracker = false
+    @State private var symptomToEdit: Symptom?
+    @State private var showingDeleteAlert = false
+    @State private var symptomToDelete: Symptom?
     
     /// Filtered symptoms based on search and category
     private var filteredSymptoms: [Symptom] {
@@ -101,6 +104,21 @@ struct SymptomsListView: View {
                                             ForEach(dateGroup.value) { symptom in
                                                 SymptomRowView(symptom: symptom)
                                                     .padding(.horizontal)
+                                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                                        Button(role: .destructive) {
+                                                            symptomToDelete = symptom
+                                                            showingDeleteAlert = true
+                                                        } label: {
+                                                            Label("Delete", systemImage: "trash")
+                                                        }
+                                                        
+                                                        Button {
+                                                            symptomToEdit = symptom
+                                                        } label: {
+                                                            Label("Edit", systemImage: "pencil")
+                                                        }
+                                                        .tint(.purple)
+                                                    }
                                             }
                                         } header: {
                                             HStack {
@@ -148,7 +166,30 @@ struct SymptomsListView: View {
             .sheet(isPresented: $showingSymptomTracker) {
                 SymptomTrackingSheet()
             }
+            .sheet(item: $symptomToEdit) { symptom in
+                SymptomEditSheet(symptom: symptom)
+            }
+            .alert("Delete Symptom", isPresented: $showingDeleteAlert) {
+                Button("Cancel", role: .cancel) {
+                    symptomToDelete = nil
+                }
+                Button("Delete", role: .destructive) {
+                    if let symptom = symptomToDelete {
+                        deleteSymptom(symptom)
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to delete this symptom? This action cannot be undone.")
+            }
         }
+    }
+    
+    // MARK: - Helper Methods
+    
+    /// Delete a symptom
+    private func deleteSymptom(_ symptom: Symptom) {
+        modelContext.delete(symptom)
+        symptomToDelete = nil
     }
     
     // MARK: - Supporting Views

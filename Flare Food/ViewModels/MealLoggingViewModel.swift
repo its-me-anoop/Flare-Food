@@ -19,6 +19,9 @@ final class MealLoggingViewModel: ObservableObject {
     /// Selected meal type
     @Published var selectedMealType: Meal.MealType = .breakfast
     
+    /// Selected timestamp for the meal
+    @Published var selectedTimestamp: Date = Date()
+    
     /// Selected foods for the meal
     @Published var selectedFoodItems: [FoodItemSelection] = []
     
@@ -151,6 +154,7 @@ final class MealLoggingViewModel: ObservableObject {
             // Create meal
             let meal = Meal(
                 mealType: selectedMealType,
+                timestamp: selectedTimestamp,
                 foodItems: foodItems,
                 photoData: photoData,
                 notes: notes.isEmpty ? nil : notes,
@@ -177,6 +181,7 @@ final class MealLoggingViewModel: ObservableObject {
     /// Resets the form to initial state
     func resetForm() {
         selectedMealType = determineMealType()
+        selectedTimestamp = Date()
         selectedFoodItems = []
         selectedPhotoItem = nil
         photoData = nil

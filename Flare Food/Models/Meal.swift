@@ -37,19 +37,21 @@ final class Meal {
     /// Initializes a new Meal entry
     /// - Parameters:
     ///   - mealType: The type of meal
+    ///   - timestamp: When the meal was consumed
     ///   - foodItems: Array of food items with portions
     ///   - photoData: Optional photo data
     ///   - notes: Optional notes
     ///   - location: Optional location
     init(
         mealType: MealType,
+        timestamp: Date = Date(),
         foodItems: [FoodItem] = [],
         photoData: Data? = nil,
         notes: String? = nil,
         location: String? = nil
     ) {
         self.id = UUID()
-        self.timestamp = Date()
+        self.timestamp = timestamp
         self.mealType = mealType.rawValue
         self.foodItems = foodItems
         self.photoData = photoData

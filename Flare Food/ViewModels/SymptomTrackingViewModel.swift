@@ -18,6 +18,9 @@ final class SymptomTrackingViewModel: ObservableObject {
     /// Selected symptom type
     @Published var selectedSymptomType: Symptom.SymptomType = .stomachPain
     
+    /// Selected timestamp for the symptom
+    @Published var selectedTimestamp: Date = Date()
+    
     /// Symptom severity (0-10)
     @Published var severity: Double = 5.0
     
@@ -125,6 +128,7 @@ final class SymptomTrackingViewModel: ObservableObject {
             // Create symptom
             let symptom = Symptom(
                 type: selectedSymptomType,
+                timestamp: selectedTimestamp,
                 severity: severity,
                 notes: notes.isEmpty ? nil : notes,
                 medications: medications,
@@ -155,6 +159,7 @@ final class SymptomTrackingViewModel: ObservableObject {
     /// Resets the form to initial state
     func resetForm() {
         selectedSymptomType = .stomachPain
+        selectedTimestamp = Date()
         severity = 5.0
         notes = ""
         medications = []

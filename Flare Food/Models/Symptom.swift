@@ -39,6 +39,7 @@ final class Symptom {
     /// Initializes a new Symptom entry
     /// - Parameters:
     ///   - type: The type of symptom
+    ///   - timestamp: When the symptom occurred
     ///   - severity: Severity on a scale of 0-10
     ///   - notes: Optional notes
     ///   - medications: Array of medications taken
@@ -46,6 +47,7 @@ final class Symptom {
     ///   - bodyLocation: Optional body location
     init(
         type: SymptomType,
+        timestamp: Date = Date(),
         severity: Double,
         notes: String? = nil,
         medications: [String] = [],
@@ -53,7 +55,7 @@ final class Symptom {
         bodyLocation: String? = nil
     ) {
         self.id = UUID()
-        self.timestamp = Date()
+        self.timestamp = timestamp
         self.symptomType = type.rawValue
         self.severity = max(0.0, min(10.0, severity))
         self.notes = notes

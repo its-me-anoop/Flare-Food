@@ -47,6 +47,9 @@ private struct SymptomTrackingSheetContent: View {
                             // Symptom Type Selection
                             symptomTypeSection
                             
+                            // Date and Time Selection
+                            dateTimeSection
+                            
                             // Severity Slider
                             severitySection
                             
@@ -101,6 +104,25 @@ private struct SymptomTrackingSheetContent: View {
                 }
                 .padding(.horizontal)
             }
+        }
+    }
+    
+    /// Date and time selection
+    private var dateTimeSection: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.small) {
+            Label("Date & Time", systemImage: "calendar.clock")
+                .font(.headline)
+                .foregroundStyle(DesignSystem.Gradients.accent)
+            
+            DatePicker(
+                "",
+                selection: $viewModel.selectedTimestamp,
+                displayedComponents: [.date, .hourAndMinute]
+            )
+            .datePickerStyle(.compact)
+            .labelsHidden()
+            .padding()
+            .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
         }
     }
     
