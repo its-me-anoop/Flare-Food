@@ -76,7 +76,6 @@ struct HomeView: View {
                     }
                     .padding()
                 }
-            }
             .navigationTitle("Home")
             .navigationBarTitleDisplayMode(.large)
             .onAppear {
@@ -265,7 +264,8 @@ struct StatCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(DesignSystem.Spacing.medium)
-        .glassBackground()
+        .background(DesignSystem.Colors.cardBackground)
+        .cornerRadius(DesignSystem.CornerRadius.medium)
     }
 }
 
@@ -281,7 +281,8 @@ struct RecentMealCard: View {
                     .font(.title2)
                     .foregroundStyle(DesignSystem.Gradients.primary)
                     .frame(width: 44, height: 44)
-                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
+                    .background(DesignSystem.Colors.cardBackground)
+                    .cornerRadius(DesignSystem.CornerRadius.small)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(meal.type.rawValue)
@@ -303,7 +304,8 @@ struct RecentMealCard: View {
                     .foregroundColor(DesignSystem.Colors.secondaryText)
             }
             .padding(DesignSystem.Spacing.small)
-            .glassBackground()
+            .background(DesignSystem.Colors.cardBackground)
+            .cornerRadius(DesignSystem.CornerRadius.medium)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -321,7 +323,8 @@ struct RecentSymptomCard: View {
                     .font(.title2)
                     .foregroundStyle(DesignSystem.Gradients.secondary)
                     .frame(width: 44, height: 44)
-                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
+                    .background(DesignSystem.Colors.cardBackground)
+                    .cornerRadius(DesignSystem.CornerRadius.small)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(symptom.type.rawValue)
@@ -346,7 +349,8 @@ struct RecentSymptomCard: View {
                     .foregroundColor(DesignSystem.Colors.secondaryText)
             }
             .padding(DesignSystem.Spacing.small)
-            .glassBackground()
+            .background(DesignSystem.Colors.cardBackground)
+            .cornerRadius(DesignSystem.CornerRadius.medium)
         }
         .buttonStyle(PlainButtonStyle())
     }
