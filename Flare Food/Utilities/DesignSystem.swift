@@ -38,8 +38,7 @@ struct DesignSystem {
         static let secondaryText = Color.secondary
         
         // Glass effect colors
-        static let glassBackground = Color.white.opacity(0.7)
-        static let glassBackgroundDark = Color.black.opacity(0.2)
+        static let glassBackground = Color.glassBackground
     }
     
     // MARK: - Gradients
@@ -65,12 +64,6 @@ struct DesignSystem {
         
         static let success = LinearGradient(
             colors: [Colors.successGradientStart, Colors.successGradientEnd],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        
-        static let cardBackground = LinearGradient(
-            colors: [Color.white.opacity(0.9), Color.white.opacity(0.7)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -126,7 +119,7 @@ struct GlassBackground: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(.ultraThinMaterial)
-            .background(DesignSystem.Colors.glassBackgroundDark)
+            .background(DesignSystem.Colors.glassBackground)
             .cornerRadius(cornerRadius)
             .shadow(color: .black.opacity(0.1), radius: shadowRadius, x: 0, y: 8)
     }
@@ -167,7 +160,7 @@ struct CardStyle: ViewModifier {
         content
             .padding(padding)
             .background(.ultraThinMaterial)
-            .background(DesignSystem.Gradients.cardBackground)
+            .background(DesignSystem.Colors.glassBackground)
             .cornerRadius(DesignSystem.CornerRadius.medium)
             .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
     }

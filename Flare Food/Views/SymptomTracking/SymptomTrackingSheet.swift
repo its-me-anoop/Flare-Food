@@ -36,16 +36,6 @@ private struct SymptomTrackingSheetContent: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [
-                        DesignSystem.Colors.background,
-                        DesignSystem.Colors.secondaryGradientStart.opacity(0.1)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
                 
                 ScrollView {
                     VStack(spacing: DesignSystem.Spacing.large) {

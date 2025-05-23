@@ -111,11 +111,6 @@ struct SymptomsListView: View {
                                                 Spacer()
                                             }
                                             .padding(.horizontal)
-                                            .background(
-                                                DesignSystem.Colors.background
-                                                    .opacity(0.95)
-                                                    .ignoresSafeArea(edges: .horizontal)
-                                            )
                                         }
                                     }
                                 }
