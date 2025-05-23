@@ -34,8 +34,8 @@ struct DesignSystem {
         static let secondaryBackground = Color.white
         
         // Text colors
-        static let primaryText = Color.black
-        static let secondaryText = Color.gray
+        static let primaryText = Color.primary
+        static let secondaryText = Color.secondary
         
         // Glass effect colors
         static let glassBackground = Color.white.opacity(0.7)
@@ -126,7 +126,7 @@ struct GlassBackground: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(.ultraThinMaterial)
-            .background(DesignSystem.Colors.glassBackground)
+            .background(DesignSystem.Colors.glassBackgroundDark)
             .cornerRadius(cornerRadius)
             .shadow(color: .black.opacity(0.1), radius: shadowRadius, x: 0, y: 8)
     }
