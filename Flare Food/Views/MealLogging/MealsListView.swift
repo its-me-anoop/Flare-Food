@@ -326,6 +326,9 @@ struct FilterChip: View {
 struct MealDetailView: View {
     let meal: Meal
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @State private var showingEditSheet = false
+    @State private var showingDeleteAlert = false
     
     var body: some View {
         NavigationStack {
@@ -422,13 +425,48 @@ struct MealDetailView: View {
             .navigationTitle("Meal Details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") {
                         dismiss()
                     }
                 }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button {
+                            showingEditSheet = true
+                        } label: {
+                            Label("Edit", systemImage: "pencil")
+                        }
+                        
+                        Button(role: .destructive) {
+                            showingDeleteAlert = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingEditSheet) {
+                MealEditSheet(meal: meal)
+            }
+            .alert("Delete Meal", isPresented: $showingDeleteAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    deleteMeal()
+                }
+            } message: {
+                Text("Are you sure you want to delete this meal? This action cannot be undone.")
             }
         }
+    }
+    
+    /// Delete the meal
+    private func deleteMeal() {
+        modelContext.delete(meal)
+        dismiss()
     }
 }
 

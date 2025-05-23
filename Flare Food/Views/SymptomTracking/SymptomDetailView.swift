@@ -12,7 +12,10 @@ import SwiftData
 struct SymptomDetailView: View {
     let symptom: Symptom
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Query private var meals: [Meal]
+    @State private var showingEditSheet = false
+    @State private var showingDeleteAlert = false
     
     /// Meals logged around the symptom time
     private var nearbyMeals: [Meal] {
@@ -58,11 +61,40 @@ struct SymptomDetailView: View {
             .navigationTitle("Symptom Details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") {
                         dismiss()
                     }
                 }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button {
+                            showingEditSheet = true
+                        } label: {
+                            Label("Edit", systemImage: "pencil")
+                        }
+                        
+                        Button(role: .destructive) {
+                            showingDeleteAlert = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingEditSheet) {
+                SymptomEditSheet(symptom: symptom)
+            }
+            .alert("Delete Symptom", isPresented: $showingDeleteAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    deleteSymptom()
+                }
+            } message: {
+                Text("Are you sure you want to delete this symptom? This action cannot be undone.")
             }
         }
     }
@@ -340,6 +372,12 @@ struct SymptomDetailView: View {
         } else {
             return "\(minutes)m before"
         }
+    }
+    
+    /// Delete the symptom
+    private func deleteSymptom() {
+        modelContext.delete(symptom)
+        dismiss()
     }
 }
 
