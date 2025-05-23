@@ -125,9 +125,15 @@ struct MealEditSheet: View {
                             .fontWeight(.medium)
                         
                         HStack {
-                            Text("\(foodItem.quantity, specifier: "%.1f") × \(foodItem.portionSize)")
-                                .font(.caption)
-                                .foregroundColor(DesignSystem.Colors.secondaryText)
+                            if let quantity = foodItem.quantity {
+                                Text("\(quantity) × \(foodItem.portionSize, specifier: "%.1f")")
+                                    .font(.caption)
+                                    .foregroundColor(DesignSystem.Colors.secondaryText)
+                            } else {
+                                Text("Portion: \(foodItem.portionSize, specifier: "%.1f")")
+                                    .font(.caption)
+                                    .foregroundColor(DesignSystem.Colors.secondaryText)
+                            }
                         }
                     }
                     
