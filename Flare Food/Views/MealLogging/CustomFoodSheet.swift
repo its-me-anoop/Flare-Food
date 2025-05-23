@@ -187,8 +187,8 @@ struct TriggerChip: View {
             .frame(maxWidth: .infinity)
             .background(
                 isSelected ?
-                DesignSystem.Gradients.primary :
-                Color.gray.opacity(0.1)
+                AnyShapeStyle(DesignSystem.Gradients.primary) :
+                AnyShapeStyle(Color.gray.opacity(0.1))
             )
             .foregroundColor(isSelected ? .white : DesignSystem.Colors.primaryText)
             .cornerRadius(DesignSystem.CornerRadius.small)
