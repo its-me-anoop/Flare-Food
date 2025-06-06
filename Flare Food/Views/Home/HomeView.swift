@@ -406,8 +406,7 @@ struct StatCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(DesignSystem.Spacing.medium)
-        .background(DesignSystem.Colors.cardBackground)
-        .cornerRadius(DesignSystem.CornerRadius.medium)
+        .glassBackground()
     }
 }
 
@@ -423,8 +422,7 @@ struct RecentMealCard: View {
                     .font(.title2)
                     .foregroundStyle(DesignSystem.Gradients.primary)
                     .frame(width: 44, height: 44)
-                    .background(DesignSystem.Colors.cardBackground)
-                    .cornerRadius(DesignSystem.CornerRadius.small)
+                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(meal.type.rawValue)
@@ -446,8 +444,7 @@ struct RecentMealCard: View {
                     .foregroundColor(DesignSystem.Colors.secondaryText)
             }
             .padding(DesignSystem.Spacing.small)
-            .background(DesignSystem.Colors.cardBackground)
-            .cornerRadius(DesignSystem.CornerRadius.medium)
+            .glassBackground()
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -471,8 +468,7 @@ struct RecentBeverageCard: View {
                         ) : DesignSystem.Gradients.accent
                     )
                     .frame(width: 44, height: 44)
-                    .background(DesignSystem.Colors.cardBackground)
-                    .cornerRadius(DesignSystem.CornerRadius.small)
+                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(beverage.displayName)
@@ -501,8 +497,7 @@ struct RecentBeverageCard: View {
                     .foregroundColor(DesignSystem.Colors.secondaryText)
             }
             .padding(DesignSystem.Spacing.small)
-            .background(DesignSystem.Colors.cardBackground)
-            .cornerRadius(DesignSystem.CornerRadius.medium)
+            .glassBackground()
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -520,8 +515,7 @@ struct RecentSymptomCard: View {
                     .font(.title2)
                     .foregroundStyle(DesignSystem.Gradients.secondary)
                     .frame(width: 44, height: 44)
-                    .background(DesignSystem.Colors.cardBackground)
-                    .cornerRadius(DesignSystem.CornerRadius.small)
+                    .glassBackground(cornerRadius: DesignSystem.CornerRadius.small)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(symptom.type.rawValue)
@@ -546,8 +540,7 @@ struct RecentSymptomCard: View {
                     .foregroundColor(DesignSystem.Colors.secondaryText)
             }
             .padding(DesignSystem.Spacing.small)
-            .background(DesignSystem.Colors.cardBackground)
-            .cornerRadius(DesignSystem.CornerRadius.medium)
+            .glassBackground()
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -592,8 +585,7 @@ struct QuickActionButton: View {
             .cornerRadius(DesignSystem.CornerRadius.medium)
             .shadow(color: color.opacity(0.3), radius: 12, x: 0, y: 6)
         }
-        .buttonStyle(PlainButtonStyle())
-        .scaleEffect(1.0)
+        .buttonStyle(PressableButtonStyle())
     }
     
     private func gradientForColor(_ color: Color) -> LinearGradient {
