@@ -309,40 +309,36 @@ struct HomeView: View {
             Text("Quick Actions")
                 .font(.headline)
             
-            VStack(spacing: 12) {
-                HStack(spacing: 12) {
-                    QuickActionButton(
-                        title: "Log Meal",
-                        icon: "plus.circle.fill",
-                        color: .orange,
-                        action: {
-                            showingMealLogger = true
-                        }
-                    )
-                    
-                    QuickActionButton(
-                        title: "Track Symptom",
-                        icon: "heart.text.square.fill",
-                        color: .pink,
-                        action: {
-                            showingSymptomTracker = true
-                        }
-                    )
+        let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+        LazyVGrid(columns: columns, spacing: 12) {
+            QuickActionButton(
+                title: "Log Meal",
+                icon: "plus.circle.fill",
+                color: .orange,
+                action: {
+                    showingMealLogger = true
                 }
-                
-                HStack(spacing: 12) {
-                    QuickActionButton(
-                        title: "Log Beverage",
-                        icon: "drop.fill",
-                        color: .blue,
-                        action: {
-                            showingBeverageLogger = true
-                        }
-                    )
-                    
-                    Spacer()
+            )
+
+            QuickActionButton(
+                title: "Track Symptom",
+                icon: "heart.text.square.fill",
+                color: .pink,
+                action: {
+                    showingSymptomTracker = true
                 }
-            }
+            )
+
+            QuickActionButton(
+                title: "Log Beverage",
+                icon: "drop.fill",
+                color: .blue,
+                action: {
+                    showingBeverageLogger = true
+                }
+            )
+        }
         }
     }
     
